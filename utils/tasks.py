@@ -172,22 +172,19 @@ async def update_rounds(client):
 
 
 async def create_backup(client):
-    logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-    await logging_channel.send("Attempting to take backup...")
     try:
         if not os.path.isdir(BACKUP_DIR):
             os.mkdir(BACKUP_DIR)
         filename = f"lockout_backup_{date.today().strftime('%d_%m_%y')}_{int(time.time())}"
         command = f"pg_dump --dbname=postgresql://{os.environ.get('DB_USERNAME')}:{os.environ.get('DB_PASSWORD')}@127.0.0.1:5432/{os.environ.get('DB_NAME')} > {BACKUP_DIR+filename}.bak"
         os.system(command)
-        await logging_channel.send("Backup taken successfully")
+        
     except Exception as e:
+        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
         await logging_channel.send(f"Failed to take backup: {str(traceback.format_exc())}")
 
 
 async def update_ratings(client):
-    logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-    await logging_channel.send("Attempting to update ratings...")
     try:
         handles = [x[2] for x in db.get_all_handles()]
         handles = list(set(handles))
@@ -213,8 +210,8 @@ async def update_ratings(client):
             for user in data:
                 db.update_cf_rating(user['handle'], user['rating'] if 'rating' in user else 0)
 
-        await logging_channel.send("Ratings updated successfully")
     except Exception as e:
+        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
         await logging_channel.send(f"Error while updating ratings: {str(traceback.format_exc())}")
 
 
@@ -229,9 +226,6 @@ def isNonStandard(contest_name):
 
 
 async def update_problemset(client):
-    logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-    await logging_channel.send("Attempting to update problemset...")
-
     contest_id = [x[0] for x in db.get_contests_id()]
     problem_id = [x.id for x in db.get_problems()]
     contest_list = await cf.get_contest_list()
@@ -252,18 +246,17 @@ async def update_problemset(client):
             if problem['contestId'] in mapping and not isNonStandard(mapping[problem['contestId']]) and 'rating' in problem and problem['contestId'] not in problem_id:
                 prob_cnt += 1
                 db.add_problem(problem['contestId'], problem['index'], problem['name'], problem['type'], problem['rating'])
-        await logging_channel.send(f"Problemset Updated, added {con_cnt} new contests and {prob_cnt} new problems")
+                
     except Exception as e:
+        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
         await logging_channel.send(f"Error while updating problemset: {str(traceback.format_exc())}")
 
 
 async def scrape_authors(client):
-    logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-    await logging_channel.send("Scraping contest author list...")
     try:
         scraper.run()
-        await logging_channel.send("Done")
     except Exception as e:
+        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
         await logging_channel.send(f"Error while scraping {str(traceback.format_exc())}")
 
 
