@@ -29,7 +29,7 @@ class Round(commands.Cog):
         self.api = challonge_api.ChallongeAPI(self.client)
 
     def make_round_embed(self, ctx):
-        desc = f"Information about Matches related commands! **[use {PREFIX}round <command>]**\n\n"
+        desc = f"Information about Match related commands! **[use {PREFIX}round <command>]**\n\n"
         match = self.client.get_command('round')
 
         for cmd in match.commands:

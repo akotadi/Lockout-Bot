@@ -22,12 +22,12 @@ class Help(commands.Cog):
 
 
         content = []
-        desc = f"\n\n:crossed_swords: [Handle related commands](https://github.com/pseudocoder10/Lockout-Bot/wiki/Handles-related-commands) **[use {PREFIX}handle <command>]**\n\n"
+        desc = f"\n\n:crossed_swords: [Handle related commands](https://github.com/pseudocoder10/Lockout-Bot/wiki/Handle-related-commands) **[use {PREFIX}handle <command>]**\n\n"
         for cmd in handle.commands:
             desc += f"`{cmd.name}`: **{cmd.brief}**\n"
         content.append(desc)
 
-        desc = f"\n\n:crossed_swords: [Match related commands](https://github.com/pseudocoder10/Lockout-Bot/wiki/Matches-related-commands) **[use {PREFIX}match <command>]**\n\n"
+        desc = f"\n\n:crossed_swords: [Match related commands](https://github.com/pseudocoder10/Lockout-Bot/wiki/Match-related-commands) **[use {PREFIX}match <command>]**\n\n"
         for cmd in match.commands:
             desc += f"`{cmd.name}`: **{cmd.brief}**\n"
         content.append(desc)

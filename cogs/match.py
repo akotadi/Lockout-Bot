@@ -73,14 +73,14 @@ async def get_time_response(client, ctx, message, time, author, range_):
         return [False]
 
 
-class Matches(commands.Cog):
+class Match(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.db = dbconn.DbConn()
         self.cf = cf_api.CodeforcesAPI()
 
     def make_match_embed(self, ctx):
-        desc = f"Information about Matches related commands! **[use {PREFIX}match <command>]**\n\n"
+        desc = f"Information about Match related commands! **[use {PREFIX}match <command>]**\n\n"
         match = self.client.get_command('match')
 
         for cmd in match.commands:

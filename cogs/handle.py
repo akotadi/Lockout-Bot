@@ -30,7 +30,7 @@ cf_colors = {
 }
 
 
-class Handles(commands.Cog):
+class Handle(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.db = dbconn.DbConn()
@@ -54,7 +54,7 @@ class Handles(commands.Cog):
                         inline=True)
         return embed
 
-    @commands.group(brief=f'Commands related to handles! Type {PREFIX}handle for more details', invoke_without_command=True)
+    @commands.group(brief=f'Commands related to handle! Type {PREFIX}handle for more details', invoke_without_command=True)
     async def handle(self, ctx):
         await ctx.send(embed=self.make_handle_embed(ctx))
 
