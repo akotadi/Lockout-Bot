@@ -1,0 +1,47 @@
+version: '3.0'
+
+services:
+  postgres:
+    container_name: lockout_postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - lockout
+    restart: unless-stopped
+
+  bot:
+    container_name: lockout_bot
+    build: .
+    volumes:
+      - ./:/data
+    networks:
+      - lockout
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    environment:
+      LOCKOUT_BOT_TOKEN: "${LOCKOUT_BOT_TOKEN}"
+      LOGGING_CHANNEL: "${LOGGING_CHANNEL}"
+      DB_HOST: "${DB_HOST}"
+      DB_NAME: "${DB_NAME}"
+      DB_USERNAME: "${DB_USERNAME}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      CHALLONGE_KEY: "${CHALLONGE_KEY}"
+
+volumes:
+  lockout:
+    external: false
+
+  postgres:
+    external: false
+
+networks:
+  lockout:

@@ -10,7 +10,7 @@ class DbConn:
     def __init__(self):
         load_dotenv('.env')
         self.conn = psycopg2.connect(database=os.environ.get("DB_NAME"), user=os.environ.get("DB_USERNAME"),
-                                     password=os.environ.get("DB_PASSWORD"), host="127.0.0.1", port="5432")
+                                     password=os.environ.get("DB_PASSWORD"), host=os.environ.get("DB_HOST"), port="5432")
         self.make_tables()
 
     def make_tables(self):
