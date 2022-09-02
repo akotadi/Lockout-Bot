@@ -28,28 +28,9 @@ class Round(commands.Cog):
         self.cf = cf_api.CodeforcesAPI()
         self.api = challonge_api.ChallongeAPI(self.client)
 
-    def make_round_embed(self, ctx):
-        desc = f"Information about Match related commands! **[use {PREFIX}round <command>]**\n\n"
-        match = self.client.get_command('round')
-
-        for cmd in match.commands:
-            desc += f"`{cmd.name}`: **{cmd.brief}**\n"
-        embed = discord.Embed(description=desc, color=discord.Color.dark_magenta())
-        embed.set_author(name="Lockout commands help", icon_url=ctx.me.avatar_url)
-        embed.set_footer(
-            text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help match <command>")
-        embed.add_field(name="GitHub repository", value=f"[GitHub](https://github.com/pseudocoder10/Lockout-Bot)",
-                        inline=True)
-        embed.add_field(name="Bot Invite link",
-                        value=f"[Invite](https://discord.com/oauth2/authorize?client_id=669978762120790045&permissions=0&scope=bot)",
-                        inline=True)
-        embed.add_field(name="Support Server", value=f"[Server](https://discord.gg/xP2UPUn)",
-                        inline=True)
-        return embed
-
     @commands.group(brief=f'Commands related to rounds! Type {PREFIX}round for more details', invoke_without_command=True)
     async def round(self, ctx):
-        await ctx.send(embed=self.make_round_embed(ctx))
+        await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'round'))
 
     @round.command(name="challenge", brief="Challenge multiple users to a round")
     async def challenge(self, ctx, *users: discord.Member):

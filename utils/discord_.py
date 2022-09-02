@@ -5,7 +5,7 @@ import math
 
 from humanfriendly import format_timespan as timeez
 
-from constants import ADMIN_PRIVILEGE_ROLES
+from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
 from utils.updation import match_score, round_score
 from utils import updation, cf_api
 from data import dbconn
@@ -312,4 +312,14 @@ async def content_pagination(content, client, PER_PAGE, heading, ctx, color, ext
             break
 
 
+def make_command_help_embed(client, ctx, command):
+    desc = f"Information about {command.title()} related commands! **[use {PREFIX}{command} <command>]**\n\n"
+    handle = client.get_command(command)
+    for cmd in handle.commands:
+        desc += f"`{cmd.name}`: **{cmd.brief}**\n"
+    embed = discord.Embed(description=desc, color=discord.Color.dark_magenta())
+    embed.set_author(name="Lockout commands help", icon_url=ctx.me.avatar_url)
+    embed.set_footer(
+        text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help <command>")
+    return embed
 

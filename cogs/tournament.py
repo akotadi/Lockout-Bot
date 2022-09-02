@@ -20,27 +20,9 @@ class Tournament(commands.Cog):
         self.db = dbconn.DbConn()
         self.api = challonge_api.ChallongeAPI(self.client)
 
-    def make_tournament_embed(self, ctx):
-        desc = f"Information about Tournament related commands! **[use {PREFIX}tournament <command>]**\n\n"
-        handle = self.client.get_command('tournament')
-        for cmd in handle.commands:
-            desc += f"`{cmd.name}`: **{cmd.brief}**\n"
-        embed = discord.Embed(description=desc, color=discord.Color.dark_magenta())
-        embed.set_author(name="Lockout commands help", icon_url=ctx.me.avatar_url)
-        embed.set_footer(
-            text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help <command>")
-        embed.add_field(name="GitHub repository", value=f"[GitHub]({GITHUB_LINK})",
-                        inline=True)
-        embed.add_field(name="Bot Invite link",
-                        value=f"[Invite]({BOT_INVITE})",
-                        inline=True)
-        embed.add_field(name="Support Server", value=f"[Server]({SERVER_INVITE})",
-                        inline=True)
-        return embed
-
     @commands.group(brief=f'Commands related to tournaments! Type {PREFIX}tournament for more details', invoke_without_command=True, aliases=['tourney'])
     async def tournament(self, ctx):
-        await ctx.send(embed=self.make_tournament_embed(ctx))
+        await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'tournament'))
 
     @tournament.command(name="faq", brief="FAQ")
     async def faq(self, ctx):
