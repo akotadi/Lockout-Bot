@@ -204,4 +204,4 @@ class Handle(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Handles(client))
+    client.add_cog(Handle(client))

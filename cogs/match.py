@@ -497,4 +497,4 @@ class Match(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Matches(client))
+    client.add_cog(Match(client))

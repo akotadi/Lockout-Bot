@@ -41,7 +41,7 @@ class Round(commands.Cog):
         if ctx.author not in users:
             users.append(ctx.author)
         if len(users) > MAX_ROUND_USERS:
-            await ctx.send(f"{ctx.author.mention} atmost {MAX_ROUND_USERS} users can compete at a time")
+            await ctx.send(f"{ctx.author.mention} at most {MAX_ROUND_USERS} users can compete at a time")
             return
         for i in users:
             if not self.db.get_handle(ctx.guild.id, i.id):
@@ -403,7 +403,7 @@ class Round(commands.Cog):
         if ctx.author not in users:
             users.append(ctx.author)
         if len(users) > MAX_ROUND_USERS:
-            await ctx.send(f"{ctx.author.mention} atmost {MAX_ROUND_USERS} users can compete at a time")
+            await ctx.send(f"{ctx.author.mention} at most {MAX_ROUND_USERS} users can compete at a time")
             return
         for i in users:
             if not self.db.get_handle(ctx.guild.id, i.id):
