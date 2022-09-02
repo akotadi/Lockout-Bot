@@ -10,7 +10,7 @@ from discord.ext.commands import cooldown, BucketType, CommandOnCooldown
 
 from data import dbconn
 from utils import cf_api, paginator, discord_
-from constants import BOT_INVITE, GITHUB_LINK, SERVER_INVITE, ADMIN_PRIVILEGE_ROLES
+from constants import BOT_INVITE, GITHUB_LINK, SERVER_INVITE, ADMIN_PRIVILEGE_ROLES, PREFIX
 
 HANDLE_IDENTIFY_WAIT_TIME = 60
 HANDLES_PER_PAGE = 15
@@ -37,14 +37,14 @@ class Handles(commands.Cog):
         self.cf = cf_api.CodeforcesAPI()
 
     def make_handle_embed(self, ctx):
-        desc = "Information about Handle related commands! **[use .handle <command>]**\n\n"
+        desc = f"Information about Handle related commands! **[use {PREFIX}handle <command>]**\n\n"
         handle = self.client.get_command('handle')
         for cmd in handle.commands:
             desc += f"`{cmd.name}`: **{cmd.brief}**\n"
         embed = discord.Embed(description=desc, color=discord.Color.dark_magenta())
         embed.set_author(name="Lockout commands help", icon_url=ctx.me.avatar_url)
         embed.set_footer(
-            text="Use the prefix . before each command. For detailed usage about a particular command, type .help <command>")
+            text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help <command>")
         embed.add_field(name="GitHub repository", value=f"[GitHub]({GITHUB_LINK})",
                         inline=True)
         embed.add_field(name="Bot Invite link",
@@ -54,7 +54,7 @@ class Handles(commands.Cog):
                         inline=True)
         return embed
 
-    @commands.group(brief='Commands related to handles! Type .handle for more details', invoke_without_command=True)
+    @commands.group(brief=f'Commands related to handles! Type {PREFIX}handle for more details', invoke_without_command=True)
     async def handle(self, ctx):
         await ctx.send(embed=self.make_handle_embed(ctx))
 

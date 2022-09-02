@@ -8,11 +8,11 @@ from apscheduler.triggers.cron import CronTrigger
 from discord.ext.commands import CommandNotFound, CommandOnCooldown, MissingPermissions, MissingRequiredArgument, BadArgument, MemberNotFound
 
 from utils import tasks
-from constants import AUTO_UPDATE_TIME
+from constants import AUTO_UPDATE_TIME, PREFIX
 
 intents = discord.Intents.default()
 intents.members = False
-client = Bot(case_insensitive=True, description="Lockout Bot", command_prefix=when_mentioned_or("."), intents=intents)
+client = Bot(case_insensitive=True, description="Lockout Bot", command_prefix=when_mentioned_or(PREFIX), intents=intents)
 
 logging_channel = None
 

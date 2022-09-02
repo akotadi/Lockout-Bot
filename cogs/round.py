@@ -9,7 +9,7 @@ from discord.ext.commands import cooldown, BucketType
 
 from data import dbconn
 from utils import cf_api, discord_, codeforces, updation, elo, tournament_helper, challonge_api
-from constants import AUTO_UPDATE_TIME, ADMIN_PRIVILEGE_ROLES
+from constants import AUTO_UPDATE_TIME, ADMIN_PRIVILEGE_ROLES, PREFIX
 
 
 MAX_ROUND_USERS = 5
@@ -29,7 +29,7 @@ class Round(commands.Cog):
         self.api = challonge_api.ChallongeAPI(self.client)
 
     def make_round_embed(self, ctx):
-        desc = "Information about Matches related commands! **[use .round <command>]**\n\n"
+        desc = f"Information about Matches related commands! **[use {PREFIX}round <command>]**\n\n"
         match = self.client.get_command('round')
 
         for cmd in match.commands:
@@ -37,7 +37,7 @@ class Round(commands.Cog):
         embed = discord.Embed(description=desc, color=discord.Color.dark_magenta())
         embed.set_author(name="Lockout commands help", icon_url=ctx.me.avatar_url)
         embed.set_footer(
-            text="Use the prefix . before each command. For detailed usage about a particular command, type .help match <command>")
+            text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help match <command>")
         embed.add_field(name="GitHub repository", value=f"[GitHub](https://github.com/pseudocoder10/Lockout-Bot)",
                         inline=True)
         embed.add_field(name="Bot Invite link",
@@ -47,7 +47,7 @@ class Round(commands.Cog):
                         inline=True)
         return embed
 
-    @commands.group(brief='Commands related to rounds! Type .round for more details', invoke_without_command=True)
+    @commands.group(brief=f'Commands related to rounds! Type {PREFIX}round for more details', invoke_without_command=True)
     async def round(self, ctx):
         await ctx.send(embed=self.make_round_embed(ctx))
 
@@ -55,7 +55,7 @@ class Round(commands.Cog):
     async def challenge(self, ctx, *users: discord.Member):
         users = list(set(users))
         if len(users) == 0:
-            await discord_.send_message(ctx, f"The correct usage is `.round challenge @user1 @user2...`")
+            await discord_.send_message(ctx, f"The correct usage is `{PREFIX}round challenge @user1 @user2...`")
             return
         if ctx.author not in users:
             users.append(ctx.author)
@@ -64,7 +64,7 @@ class Round(commands.Cog):
             return
         for i in users:
             if not self.db.get_handle(ctx.guild.id, i.id):
-                await discord_.send_message(ctx, f"Handle for {i.mention} not set! Use `.handle identify` to register")
+                await discord_.send_message(ctx, f"Handle for {i.mention} not set! Use `{PREFIX}handle identify` to register")
                 return
             if self.db.in_a_round(ctx.guild.id, i.id):
                 await discord_.send_message(ctx, f"{i.mention} is already in a round!")
@@ -376,20 +376,20 @@ class Round(commands.Cog):
                         else:
                             res = await tournament_helper.validate_match(round_info.guild, ranklist[0].id, ranklist[1].id, self.api, self.db)
                             if not res[0]:
-                                await discord_.send_message(channel, res[1] + "\n\nIf you think this is a mistake, type `.tournament forcewin <handle>` to grant victory to a user")
+                                await discord_.send_message(channel, res[1] + f"\n\nIf you think this is a mistake, type `{PREFIX}tournament forcewin <handle>` to grant victory to a user")
                             else:
                                 draw = True if ranklist[1].rank == 1 else False
                                 scores = f"{ranklist[0].points}-{ranklist[1].points}" if res[1]['player1'] == res[1][
                                     ranklist[0].id] else f"{ranklist[1].points}-{ranklist[0].points}"
                                 match_resp = await self.api.post_match_results(res[1]['tournament_id'], res[1]['match_id'], scores, res[1][ranklist[0].id] if not draw else "tie")
                                 if not match_resp or 'errors' in match_resp:
-                                    await discord_.send_message(channel, "Some error occurred while validating tournament match. \n\nType `.tournament forcewin <handle>` to grant victory to a user manually")
+                                    await discord_.send_message(channel, f"Some error occurred while validating tournament match. \n\nType `{PREFIX}tournament forcewin <handle>` to grant victory to a user manually")
                                     if match_resp and 'errors' in match_resp:
                                         logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
                                         await logging_channel.send(f"Error while validating tournament rounds: {match_resp['errors']}")
                                     continue
                                 winner_handle = self.db.get_handle(round_info.guild, ranklist[0].id)
-                                await discord_.send_message(channel, f"{f'Congrats **{winner_handle}** for qualifying to the next round. :tada:' if not draw else 'The round ended in a draw!'}\n\nTo view the list of future tournament rounds, type `.tournament matches`")
+                                await discord_.send_message(channel, f"{f'Congrats **{winner_handle}** for qualifying to the next round. :tada:' if not draw else 'The round ended in a draw!'}\n\nTo view the list of future tournament rounds, type `{PREFIX}tournament matches`")
                                 if await tournament_helper.validate_tournament_completion(round_info.guild, self.api, self.db):
                                     await self.api.finish_tournament(res[1]['tournament_id'])
                                     await asyncio.sleep(3)
@@ -417,7 +417,7 @@ class Round(commands.Cog):
     async def custom(self, ctx, *users: discord.Member):
         users = list(set(users))
         if len(users) == 0:
-            await discord_.send_message(ctx, f"The correct usage is `.round custom @user1 @user2...`")
+            await discord_.send_message(ctx, f"The correct usage is `{PREFIX}round custom @user1 @user2...`")
             return
         if ctx.author not in users:
             users.append(ctx.author)
@@ -426,7 +426,7 @@ class Round(commands.Cog):
             return
         for i in users:
             if not self.db.get_handle(ctx.guild.id, i.id):
-                await discord_.send_message(ctx, f"Handle for {i.mention} not set! Use `.handle identify` to register")
+                await discord_.send_message(ctx, f"Handle for {i.mention} not set! Use `{PREFIX}handle identify` to register")
                 return
             if self.db.in_a_round(ctx.guild.id, i.id):
                 await discord_.send_message(ctx, f"{i.mention} is already in a round!")
