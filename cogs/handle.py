@@ -10,7 +10,7 @@ from discord.ext.commands import cooldown, BucketType, CommandOnCooldown
 
 from data import dbconn
 from utils import cf_api, paginator, discord_
-from constants import BOT_INVITE, GITHUB_LINK, SERVER_INVITE, ADMIN_PRIVILEGE_ROLES, PREFIX
+from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
 
 HANDLE_IDENTIFY_WAIT_TIME = 60
 HANDLES_PER_PAGE = 15

@@ -14,7 +14,7 @@ from io import BytesIO
 
 from data import dbconn
 from utils import cf_api, paginator, discord_, codeforces, updation, elo
-from constants import BOT_INVITE, GITHUB_LINK, PREFIX, SERVER_INVITE, ADMIN_PRIVILEGE_ROLES, AUTO_UPDATE_TIME
+from constants import PREFIX, ADMIN_PRIVILEGE_ROLES
 
 LOWER_RATING = 800
 UPPER_RATING = 3600

@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
-from constants import PREFIX, SERVER_INVITE, BOT_INVITE, GITHUB_LINK
+from constants import PREFIX
 
 
 class Help(commands.Cog):
@@ -12,7 +12,7 @@ class Help(commands.Cog):
         self.client.remove_command("help")
 
     def make_help_embed(self, ctx):
-        headers = f"Information about commands are given below!\nFor general information about the bot,  type `{PREFIX}botinfo`\nThe bot is public so you can invite it to your own server by clicking [here](https://discord.com/oauth2/authorize?client_id=669978762120790045&permissions=0&scope=bot)"
+        headers = f"Information about commands are given below!\nFor general information about the bot,  type `{PREFIX}botinfo`"
         handle = self.client.get_command('handle')
         match = self.client.get_command('match')
         round = self.client.get_command('round')
@@ -48,13 +48,6 @@ class Help(commands.Cog):
             embed.set_author(name="Lockout commands help", icon_url=ctx.me.avatar_url)
             embed.set_footer(
                 text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help <command>")
-            embed.add_field(name="GitHub repository", value=f"[GitHub]({GITHUB_LINK})",
-                            inline=True)
-            embed.add_field(name="Bot Invite link",
-                            value=f"[Invite]({BOT_INVITE})",
-                            inline=True)
-            embed.add_field(name="Support Server", value=f"[Server]({SERVER_INVITE})",
-                            inline=True)
             embeds.append(embed)
 
         return embeds

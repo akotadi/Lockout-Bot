@@ -9,7 +9,7 @@ from humanfriendly import format_timespan as timeez
 
 from data import dbconn
 from utils import challonge_api, paginator, discord_, tournament_helper
-from constants import BOT_INVITE, GITHUB_LINK, PREFIX, SERVER_INVITE, ADMIN_PRIVILEGE_ROLES
+from constants import PREFIX, ADMIN_PRIVILEGE_ROLES
 
 MAX_REGISTRANTS = 256
 

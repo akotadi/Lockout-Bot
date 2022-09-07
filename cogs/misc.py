@@ -7,7 +7,7 @@ from psutil import Process, virtual_memory
 
 from utils import tasks
 from data import dbconn
-from constants import OWNERS, SERVER_INVITE, BOT_INVITE, GITHUB_LINK
+from constants import OWNERS
 
 
 class Misc(commands.Cog):
@@ -74,9 +74,6 @@ class Misc(commands.Cog):
         embed.add_field(name="Uptime", value=f"**{timeez(uptime_)}**", inline=True)
         embed.add_field(name="Memory usage", value=f"{int(mem_usage * 1024)} MB / {mem_total:,.0f} GB ({mem_of_total:.0f}%)",
                         inline=True)
-        embed.add_field(name="GitHub repository", value=f"[GitHub]({GITHUB_LINK})", inline=True)
-        embed.add_field(name="Bot Invite link", value=f"[Invite]({BOT_INVITE})", inline=True)
-        embed.add_field(name="Support Server", value=f"[Server]({SERVER_INVITE})", inline=True)
 
         await ctx.send(embed=embed)
 
