@@ -1,3 +1,4 @@
+import logging
 import discord
 import asyncio
 import os
@@ -27,6 +28,7 @@ class Round(commands.Cog):
         self.db = dbconn.DbConn()
         self.cf = cf_api.CodeforcesAPI()
         self.api = challonge_api.ChallongeAPI(self.client)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.group(brief=f'Commands related to rounds! Type {PREFIX}round for more details', invoke_without_command=True)
     async def round(self, ctx):

@@ -1,3 +1,4 @@
+import logging
 import aiohttp
 import os
 import traceback
@@ -9,6 +10,7 @@ class ChallongeAPI:
     def __init__(self, client):
         self.api_key = os.environ.get("CHALLONGE_KEY")
         self.client = client
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     async def api_response(self, method, url, params=None):
         try:
@@ -18,8 +20,7 @@ class ChallongeAPI:
                     response = await resp.json()
                     return response
         except Exception as e:
-            logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-            await logging_channel.send(f"Error while updating matches: {str(traceback.format_exc())}")
+            self.logger.error(f"Error while updating matches: {str(traceback.format_exc())}")
             return None
 
     async def add_tournament(self, tournament_info):

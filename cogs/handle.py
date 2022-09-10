@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import discord
 import random
 import string
@@ -35,6 +36,7 @@ class Handle(commands.Cog):
         self.client = client
         self.db = dbconn.DbConn()
         self.cf = cf_api.CodeforcesAPI()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.group(brief=f'Commands related to handle! Type {PREFIX}handle for more details', invoke_without_command=True)
     async def handle(self, ctx):

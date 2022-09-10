@@ -2,6 +2,7 @@ import asyncio
 import discord
 import os
 import time
+import logging
 
 from discord.ext import commands
 from discord.ext.commands import BucketType
@@ -19,6 +20,7 @@ class Tournament(commands.Cog):
         self.client = client
         self.db = dbconn.DbConn()
         self.api = challonge_api.ChallongeAPI(self.client)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.group(brief=f'Commands related to tournaments! Type {PREFIX}tournament for more details', invoke_without_command=True, aliases=['tourney'])
     async def tournament(self, ctx):
@@ -201,8 +203,6 @@ class Tournament(commands.Cog):
             await discord_.send_message(ctx, "Not enough registrants for the tournament yet")
             return
 
-        logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-
         if tournament_info.status == 0:
             resp = await discord_.get_time_response(self.client, ctx, "Are you sure you want to start the tournament? No new registrations will be allowed once the tournament has started. Type `1` for yes and `0` for no", 30, ctx.author, [0, 1])
             if not resp[0] or resp[1] == 0:
@@ -214,7 +214,7 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if tournament_resp and 'errors' in tournament_resp:
-                    await logging_channel.send(f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
+                    self.logger.error(f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
                 return
 
             # api takes some time to register tournament id
@@ -226,7 +226,7 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if participants_resp and 'errors' in participants_resp:
-                    await logging_channel.send(f"Error in bulk adding participants: {ctx.guild.id} {participants_resp['errors']}")
+                    self.logger.error(f"Error in bulk adding participants: {ctx.guild.id} {participants_resp['errors']}")
                 await self.api.delete_tournament(tournament_resp['tournament']['id'])
                 return
 
@@ -238,7 +238,7 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if predictions_resp and 'errors' in predictions_resp:
-                    await logging_channel.send(f"Error in enabling predictions: {ctx.guild.id} {predictions_resp['errors']}")
+                    self.logger.error(f"Error in enabling predictions: {ctx.guild.id} {predictions_resp['errors']}")
                 await self.api.delete_tournament(tournament_resp['tournament']['id'])
                 return
 
@@ -265,7 +265,7 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if tournament_resp and 'errors' in tournament_resp:
-                    await logging_channel.send(f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
+                    self.logger.error(f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
                 return
 
             self.db.update_tournament_params(tournament_info.id, tournament_info.url, 2, ctx.guild.id)
@@ -320,8 +320,7 @@ class Tournament(commands.Cog):
         if not matches_resp or 'errors' in matches_resp:
             await discord_.send_message(ctx, "Some error occurred, try again later")
             if matches_resp and 'errors' in matches_resp:
-                logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(
+                self.logger.error(
                     f"Error in displaying matches list: {ctx.guild.id} {matches_resp['errors']}")
             return
 
@@ -371,8 +370,7 @@ class Tournament(commands.Cog):
         if not matches_resp or 'errors' in matches_resp:
             await discord_.send_message(ctx, "Some error occurred, try again later")
             if matches_resp and 'errors' in matches_resp:
-                logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(
+                self.logger.error(
                     f"Error in forcewin match fetching: {ctx.guild.id} {matches_resp['errors']}")
             return
 
@@ -401,8 +399,7 @@ class Tournament(commands.Cog):
         if not resp or 'errors' in resp:
             await discord_.send_message(ctx, "Some error occurred, try again later")
             if resp and 'errors' in resp:
-                logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(
+                self.logger.error(
                     f"Error in forcewin match score reporting: {ctx.guild.id} {resp['errors']}")
         else:
             await discord_.send_message(ctx, f"Granted victory to user with handle `{handle}`")
@@ -452,8 +449,7 @@ class Tournament(commands.Cog):
         if not matches_resp or 'errors' in matches_resp:
             await discord_.send_message(ctx, "Some error occurred, try again later")
             if matches_resp and 'errors' in matches_resp:
-                logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(
+                self.logger.error(
                     f"Error in forcewin match fetching: {ctx.guild.id} {matches_resp['errors']}")
             return
 
@@ -484,8 +480,7 @@ class Tournament(commands.Cog):
         if not resp or 'errors' in resp:
             await discord_.send_message(ctx, "Some error occurred, try again later")
             if resp and 'errors' in resp:
-                logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(
+                self.logger.error(
                     f"Error in forcedraw match score reporting: {ctx.guild.id} {resp['errors']}")
         else:
             await discord_.send_message(ctx, f"Match involving `{handle}` has been drawn")
@@ -522,8 +517,7 @@ class Tournament(commands.Cog):
         if not matches_resp or 'errors' in matches_resp:
             await discord_.send_message(ctx, "Some error occurred, try again later")
             if matches_resp and 'errors' in matches_resp:
-                logging_channel = await self.client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(
+                self.logger.error(
                     f"Error in match_invalidate: {ctx.guild.id} {matches_resp['errors']}")
             return
 

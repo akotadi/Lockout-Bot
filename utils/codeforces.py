@@ -1,10 +1,12 @@
 import json
+import logging
 import random
 import math
 
 from utils import cf_api
 from data import dbconn
 
+logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
 cf = cf_api.CodeforcesAPI()
 

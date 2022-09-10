@@ -1,3 +1,5 @@
+import functools
+import logging
 import discord
 import time
 import asyncio
@@ -11,6 +13,7 @@ from utils import updation, cf_api
 from data import dbconn
 
 
+logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
 cf = cf_api.CodeforcesAPI()
 
@@ -323,3 +326,16 @@ def make_command_help_embed(client, ctx, command):
         text=f"Use the prefix {PREFIX} before each command. For detailed usage about a particular command, type {PREFIX}help <command>")
     return embed
 
+
+def once(func):
+    """Decorator that wraps the given async function such that it is executed only once."""
+    first = True
+
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        nonlocal first
+        if first:
+            first = False
+            await func(*args, **kwargs)
+
+    return wrapper

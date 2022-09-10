@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import matplotlib.pyplot as plt
 import os
 import math
@@ -78,6 +79,7 @@ class Match(commands.Cog):
         self.client = client
         self.db = dbconn.DbConn()
         self.cf = cf_api.CodeforcesAPI()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.group(brief=f'Commands related to matches. Type {PREFIX}match for more details', invoke_without_command=True)
     async def match(self, ctx):

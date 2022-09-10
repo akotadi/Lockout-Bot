@@ -1,3 +1,4 @@
+import logging
 import discord
 
 from discord.ext import commands
@@ -10,6 +11,7 @@ class Help(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.client.remove_command("help")
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def make_help_embed(self, ctx):
         headers = f"Information about commands are given below!\nFor general information about the bot,  type `{PREFIX}botinfo`"

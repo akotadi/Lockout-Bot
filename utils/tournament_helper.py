@@ -1,7 +1,11 @@
+import logging
 import discord
 
 from utils import challonge_api
 from data import dbconn
+
+
+logger = logging.getLogger(__name__)
 
 
 async def is_a_match(guild, p1_id, p2_id, api: challonge_api.ChallongeAPI, db: dbconn.DbConn):

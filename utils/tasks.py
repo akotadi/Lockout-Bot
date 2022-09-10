@@ -1,3 +1,4 @@
+import logging
 import os
 import discord
 import time
@@ -12,6 +13,7 @@ from constants import BACKUP_DIR, PREFIX
 from utils import updation, discord_, elo, cf_api, scraper, tournament_helper, challonge_api
 
 
+logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
 cf = cf_api.CodeforcesAPI()
 api = None
@@ -25,8 +27,7 @@ async def update_matches(client):
             guild = client.get_guild(match.guild)
             resp = await updation.update_match(match)
             if not resp[0]:
-                logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(f"Error while updating matches: {resp[1]}")
+                logger.error(f"Error while updating matches: {resp[1]}")
                 continue
             resp = resp[1]
             channel = client.get_channel(match.channel)
@@ -73,8 +74,7 @@ async def update_matches(client):
                 embed.set_author(name=f"Match over! Final standings\nScore: {a}-{b}")
                 await channel.send(embed=embed)
         except Exception as e:
-            logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-            await logging_channel.send(f"Error while updating matches: {str(traceback.format_exc())}")
+            logger.error(f"Error while updating matches: {str(traceback.format_exc())}")
 
 
 async def update_rounds(client):
@@ -87,8 +87,7 @@ async def update_rounds(client):
             guild = client.get_guild(round.guild)
             resp = await updation.update_round(round)
             if not resp[0]:
-                logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                await logging_channel.send(f"Error while updating rounds: {resp[1]}")
+                logger.error(f"Error while updating rounds: {resp[1]}")
                 continue
             resp = resp[1]
             channel = client.get_channel(round.channel)
@@ -153,8 +152,7 @@ async def update_rounds(client):
                             if not match_resp or 'errors' in match_resp:
                                 await discord_.send_message(channel, f"Some error occurred while validating tournament match. \n\nType `{PREFIX}tournament forcewin <handle>` to grant victory to a user manually")
                                 if match_resp and 'errors' in match_resp:
-                                    logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-                                    await logging_channel.send(f"Error while validating tournament rounds: {match_resp['errors']}")
+                                    logger.error(f"Error while validating tournament rounds: {match_resp['errors']}")
                                 continue
                             winner_handle = db.get_handle(round_info.guild, ranklist[0].id)
                             await discord_.send_message(channel, f"{f'Congrats **{winner_handle}** for qualifying to the next round. :tada:' if not draw else 'The round ended in a draw!'}\n\nTo view the list of future tournament rounds, type `{PREFIX}tournament matches`")
@@ -167,8 +165,7 @@ async def update_rounds(client):
                                 db.delete_tournament(round_info.guild)
 
         except Exception as e:
-            logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-            await logging_channel.send(f"Error while updating rounds: {str(traceback.format_exc())}")
+            logger.error(f"Error while updating rounds: {str(traceback.format_exc())}")
 
 
 async def create_backup(client):
@@ -180,8 +177,7 @@ async def create_backup(client):
         os.system(command)
         
     except Exception as e:
-        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-        await logging_channel.send(f"Failed to take backup: {str(traceback.format_exc())}")
+        logger.error(f"Failed to take backup: {str(traceback.format_exc())}")
 
 
 async def update_ratings(client):
@@ -211,8 +207,7 @@ async def update_ratings(client):
                 db.update_cf_rating(user['handle'], user['rating'] if 'rating' in user else 0)
 
     except Exception as e:
-        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-        await logging_channel.send(f"Error while updating ratings: {str(traceback.format_exc())}")
+        logger.error(f"Error while updating ratings: {str(traceback.format_exc())}")
 
 
 def isNonStandard(contest_name):
@@ -248,16 +243,14 @@ async def update_problemset(client):
                 db.add_problem(problem['contestId'], problem['index'], problem['name'], problem['type'], problem['rating'])
                 
     except Exception as e:
-        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-        await logging_channel.send(f"Error while updating problemset: {str(traceback.format_exc())}")
+        logger.error(f"Error while updating problemset: {str(traceback.format_exc())}")
 
 
 async def scrape_authors(client):
     try:
         scraper.run()
     except Exception as e:
-        logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-        await logging_channel.send(f"Error while scraping {str(traceback.format_exc())}")
+        logger.error(f"Error while scraping {str(traceback.format_exc())}")
 
 
 

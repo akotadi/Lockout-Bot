@@ -1,3 +1,4 @@
+import logging
 import aiohttp
 import asyncio
 
@@ -6,6 +7,7 @@ from collections import namedtuple
 
 class CodeforcesAPI:
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         pass
 
     async def api_response(self, url, params=None):

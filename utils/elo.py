@@ -1,5 +1,6 @@
 # ELO
 # python 3.4.3
+import logging
 import math
 
 
@@ -15,6 +16,7 @@ class ELOPlayer:
 class ELOMatch:
     def __init__(self):
         self.players = []
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def addPlayer(self, name, place, elo):
         player = ELOPlayer()

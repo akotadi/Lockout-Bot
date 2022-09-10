@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from math import ceil
 from random import randint
@@ -16,6 +17,7 @@ class Paginator:
         self.message = None
         self.info = info
         self.reactions = ["\U000025c0", "\U000025b6"]
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_page_elements(self, page_no):
         return self.data[(page_no-1)*self.per_page:page_no*self.per_page]

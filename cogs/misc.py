@@ -1,3 +1,4 @@
+import logging
 import discord
 import time
 
@@ -15,6 +16,7 @@ class Misc(commands.Cog):
         self.client = client
         self.db = dbconn.DbConn()
         self.uptime = int(time.time())
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.command(name="updateratings", hidden=True)
     async def updateratings(self, ctx):

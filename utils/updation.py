@@ -1,3 +1,4 @@
+import logging
 import time
 
 from functools import cmp_to_key
@@ -6,6 +7,7 @@ from collections import namedtuple
 from data import dbconn
 from utils import cf_api, codeforces
 
+logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
 cf = cf_api.CodeforcesAPI()
 

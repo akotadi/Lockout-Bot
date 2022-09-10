@@ -1,28 +1,25 @@
 import discord
 import os
 import datetime
+import logging
 
 from discord.ext.commands import Bot, when_mentioned_or
+from logging.handlers import TimedRotatingFileHandler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from discord.ext.commands import CommandNotFound, CommandOnCooldown, MissingPermissions, MissingRequiredArgument, BadArgument, MemberNotFound
 
 from utils import tasks
-from constants import AUTO_UPDATE_TIME, PREFIX
+from constants import AUTO_UPDATE_TIME, LOG_FILE_PATH, PREFIX
 
 intents = discord.Intents.default()
 intents.members = False
 client = Bot(case_insensitive=True, description="Lockout Bot", command_prefix=when_mentioned_or(PREFIX), intents=intents)
 
-logging_channel = None
-
 
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game(name="in matches ⚔️"))
-    global logging_channel
-    logging_channel = await client.fetch_channel(os.environ.get("LOGGING_CHANNEL"))
-    await logging_channel.send(f"Bot ready")
 
     scheduler = AsyncIOScheduler()
     scheduler.add_job(update, 'interval', seconds=AUTO_UPDATE_TIME)
@@ -77,17 +74,27 @@ async def on_command_error(ctx: discord.ext.commands.Context, error: Exception):
     else:
         desc = f"{ctx.author.name}({ctx.author.id}) {ctx.guild.name}({ctx.guild.id}) {ctx.message.content}\n"
         desc += f"**{str(error)}**"
-        await logging_channel.send(desc)
 
 
 if __name__ == "__main__":
+    # Logging setup
+    os.makedirs("logs", exist_ok=True)
+    logging.basicConfig(format='{asctime}:{levelname}:{name}:{message}', style='{',
+                        datefmt='%d-%m-%Y %H:%M:%S', level=logging.INFO,
+                        handlers=[logging.StreamHandler(),
+                                  TimedRotatingFileHandler(LOG_FILE_PATH, when='D',
+                                                           backupCount=3, utc=True)])
+
+    token = os.environ.get('LOCKOUT_BOT_TOKEN')
+    if not token:
+        logging.error('Token required')
+        exit
+
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             try:
                 client.load_extension(f'cogs.{filename[:-3]}')
             except Exception as e:
-                print(f'Failed to load file {filename}: {str(e)}')
-                print(str(e))
+                logging.info(f'Failed to load file {filename}: {str(e)}')
 
-    token = os.environ.get('LOCKOUT_BOT_TOKEN')
     client.run(token)
