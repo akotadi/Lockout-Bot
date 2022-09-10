@@ -1,14 +1,13 @@
-import logging
-import aiohttp
 import asyncio
-
+import logging
 from collections import namedtuple
+
+import aiohttp
 
 
 class CodeforcesAPI:
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        pass
 
     async def api_response(self, url, params=None):
         try:
@@ -30,6 +29,7 @@ class CodeforcesAPI:
                             return response
                 return response
         except Exception as e:
+            self.logger(f"Api response error: {e}")
             return None
 
     async def check_handle(self, handle):
@@ -69,7 +69,8 @@ class CodeforcesAPI:
             return [False, response['comment']]
         try:
             data = []
-            Problem = namedtuple('Problem', 'id index name type rating, sub_time, verdict')
+            Problem = namedtuple(
+                'Problem', 'id index name type rating, sub_time, verdict')
             for x in response['result']:
                 y = x['problem']
                 if 'rating' not in y:

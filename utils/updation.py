@@ -1,8 +1,7 @@
 import logging
 import time
-
-from functools import cmp_to_key
 from collections import namedtuple
+from functools import cmp_to_key
 
 from data import dbconn
 from utils import cf_api, codeforces
@@ -65,7 +64,7 @@ async def update_match(match_info):
             continue
 
         time1, time2 = codeforces.get_solve_time(sub1, int(problems[i].split('/')[0]), problems[i].split('/')[1]), \
-                       codeforces.get_solve_time(sub2, int(problems[i].split('/')[0]), problems[i].split('/')[1])
+            codeforces.get_solve_time(sub2, int(problems[i].split('/')[0]), problems[i].split('/')[1])
 
         if time1 == -1 or time2 == -1:
             judging = True
@@ -151,7 +150,8 @@ async def update_round(round_info):
             updates.append([])
             continue
 
-        times = [codeforces.get_solve_time(sub, int(problems[i].split('/')[0]), problems[i].split('/')[1]) for sub in subs]
+        times = [codeforces.get_solve_time(sub, int(problems[i].split('/')[0]),
+                                           problems[i].split('/')[1]) for sub in subs]
 
         if any([_ == -1 for _ in times]):
             judging = True
@@ -170,7 +170,7 @@ async def update_round(round_info):
         updates.append((solved))
 
         if len(solved) > 0 and round_info.repeat == 1:
-            res = await codeforces.find_problems(handles+db.fetch_alts(round_info.guild, users[0]), [rating[i]])
+            res = await codeforces.find_problems(handles + db.fetch_alts(round_info.guild, users[0]), [rating[i]])
             if not res[0]:
                 new_problem = '0'
             else:
@@ -180,6 +180,7 @@ async def update_round(round_info):
     if updated:
         db.update_round_status(round_info.guild, users[0], status, problems, timestamp)
 
-    if not judging and (enter_time > round_info.time + 60 * round_info.duration or (round_info.repeat == 0 and no_round_change_possible(status[:], points, problems))):
+    if not judging and (enter_time > round_info.time + 60 * round_info.duration or (round_info.repeat ==
+                        0 and no_round_change_possible(status[:], points, problems))):
         over = True
     return [True, [updates, over, updated]]

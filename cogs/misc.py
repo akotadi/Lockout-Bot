@@ -1,14 +1,14 @@
 import logging
-import discord
 import time
 
+import discord
 from discord.ext import commands
 from humanfriendly import format_timespan as timeez
 from psutil import Process, virtual_memory
 
-from utils import tasks
-from data import dbconn
 from constants import OWNERS
+from data import dbconn
+from utils import tasks
 
 
 class Misc(commands.Cog):
@@ -53,7 +53,7 @@ class Misc(commands.Cog):
     @commands.command()
     async def botinfo(self, ctx):
         handles = self.db.get_count('handles')
-        matches = self.db.get_count('finished') 
+        matches = self.db.get_count('finished')
         rounds = self.db.get_count('finished_rounds')
         guilds = len(self.client.guilds)
         uptime_ = int(time.time()) - self.uptime
@@ -74,8 +74,10 @@ class Misc(commands.Cog):
         embed.add_field(name="Rounds played", value=f"**{rounds}**", inline=True)
         embed.add_field(name="Servers", value=f"**{guilds}**", inline=True)
         embed.add_field(name="Uptime", value=f"**{timeez(uptime_)}**", inline=True)
-        embed.add_field(name="Memory usage", value=f"{int(mem_usage * 1024)} MB / {mem_total:,.0f} GB ({mem_of_total:.0f}%)",
-                        inline=True)
+        embed.add_field(
+            name="Memory usage",
+            value=f"{int(mem_usage * 1024)} MB / {mem_total:,.0f} GB ({mem_of_total:.0f}%)",
+            inline=True)
 
         await ctx.send(embed=embed)
 

@@ -1,20 +1,26 @@
-import discord
-import os
 import datetime
 import logging
-
-from discord.ext.commands import Bot, when_mentioned_or
+import os
 from logging.handlers import TimedRotatingFileHandler
+
+import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from discord.ext.commands import CommandNotFound, CommandOnCooldown, MissingPermissions, MissingRequiredArgument, BadArgument, MemberNotFound
+from discord.ext.commands import (BadArgument, Bot, CommandNotFound,
+                                  CommandOnCooldown, MemberNotFound,
+                                  MissingPermissions, MissingRequiredArgument,
+                                  when_mentioned_or)
 
-from utils import tasks
 from constants import AUTO_UPDATE_TIME, LOG_FILE_PATH, PREFIX
+from utils import tasks
 
 intents = discord.Intents.default()
 intents.members = False
-client = Bot(case_insensitive=True, description="Lockout Bot", command_prefix=when_mentioned_or(PREFIX), intents=intents)
+client = Bot(
+    case_insensitive=True,
+    description="Lockout Bot",
+    command_prefix=when_mentioned_or(PREFIX),
+    intents=intents)
 
 
 @client.event

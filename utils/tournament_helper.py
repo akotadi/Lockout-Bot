@@ -1,9 +1,9 @@
 import logging
+
 import discord
 
-from utils import challonge_api
 from data import dbconn
-
+from utils import challonge_api
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,8 @@ async def is_a_match(guild, p1_id, p2_id, api: challonge_api.ChallongeAPI, db: d
         return False
     for match in matches:
         data = match['match']
-        if data['state'] == 'open' and ((data['player1_id'] == p1_id and data['player2_id'] == p2_id) or (data['player1_id'] == p2_id and data['player2_id'] == p1_id)):
+        if data['state'] == 'open' and ((data['player1_id'] == p1_id and data['player2_id'] == p2_id) or (
+                data['player1_id'] == p2_id and data['player2_id'] == p1_id)):
             return True
 
     return False
@@ -41,7 +42,8 @@ async def validate_match(guild, p1_id, p2_id, api: challonge_api.ChallongeAPI, d
 
     for match in matches:
         data = match['match']
-        if data['state'] == 'open' and ((data['player1_id'] == p1_cid and data['player2_id'] == p2_cid) or (data['player1_id'] == p2_cid and data['player2_id'] == p1_cid)):
+        if data['state'] == 'open' and ((data['player1_id'] == p1_cid and data['player2_id'] == p2_cid) or (
+                data['player1_id'] == p2_cid and data['player2_id'] == p1_cid)):
             res = {p1_id: p1_cid, p2_id: p2_cid, 'match_id': data['id'], 'tournament_id': data['tournament_id'],
                    'player1': data['player1_id']}
             return [True, res]
@@ -65,7 +67,7 @@ async def validate_tournament_completion(guild, api: challonge_api.ChallongeAPI,
     return True
 
 
-async def get_winner(tournament_id, api:challonge_api.ChallongeAPI):
+async def get_winner(tournament_id, api: challonge_api.ChallongeAPI):
     participants = await api.get_particiapnts_info(tournament_id)
     for user in participants:
         if user['participant']['final_rank'] == 1:

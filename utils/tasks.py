@@ -1,17 +1,17 @@
+import asyncio
 import logging
 import os
-import discord
 import time
 import traceback
-import asyncio
-
 from datetime import date
 from operator import itemgetter
 
-from data import dbconn
-from constants import BACKUP_DIR, PREFIX
-from utils import updation, discord_, elo, cf_api, scraper, tournament_helper, challonge_api
+import discord
 
+from constants import BACKUP_DIR, PREFIX
+from data import dbconn
+from utils import (cf_api, challonge_api, discord_, elo, scraper,
+                   tournament_helper, updation)
 
 logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
@@ -33,7 +33,7 @@ async def update_matches(client):
             channel = client.get_channel(match.channel)
             if resp[1] or len(resp[0]) > 0:
                 mem1, mem2 = await discord_.fetch_member(guild, match.p1_id), \
-                             await discord_.fetch_member(guild, match.p2_id)
+                    await discord_.fetch_member(guild, match.p2_id)
                 await channel.send(
                     f"{mem1.mention} {mem2.mention}, there is an update in standings!")
 
@@ -73,7 +73,7 @@ async def update_matches(client):
                 embed.add_field(name="Rating changes", value=ratingChange)
                 embed.set_author(name=f"Match over! Final standings\nScore: {a}-{b}")
                 await channel.send(embed=embed)
-        except Exception as e:
+        except Exception:
             logger.error(f"Error while updating matches: {str(traceback.format_exc())}")
 
 
@@ -147,7 +147,8 @@ async def update_rounds(client):
                             await discord_.send_message(channel, res[1] + f"\n\nIf you think this is a mistake, type `{PREFIX}tournament forcewin <handle>` to grant victory to a user")
                         else:
                             draw = True if ranklist[1].rank == 1 else False
-                            scores = f"{ranklist[0].points}-{ranklist[1].points}" if res[1]['player1'] == res[1][ranklist[0].id] else f"{ranklist[1].points}-{ranklist[0].points}"
+                            scores = f"{ranklist[0].points}-{ranklist[1].points}" if res[1]['player1'] == res[1][ranklist[0]
+                                                                                                                 .id] else f"{ranklist[1].points}-{ranklist[0].points}"
                             match_resp = await api.post_match_results(res[1]['tournament_id'], res[1]['match_id'], scores, res[1][ranklist[0].id] if not draw else "tie")
                             if not match_resp or 'errors' in match_resp:
                                 await discord_.send_message(channel, f"Some error occurred while validating tournament match. \n\nType `{PREFIX}tournament forcewin <handle>` to grant victory to a user manually")
@@ -164,7 +165,7 @@ async def update_rounds(client):
                                 db.add_to_finished_tournaments(db.get_tournament_info(round_info.guild), winner_handle)
                                 db.delete_tournament(round_info.guild)
 
-        except Exception as e:
+        except Exception:
             logger.error(f"Error while updating rounds: {str(traceback.format_exc())}")
 
 
@@ -175,8 +176,8 @@ async def create_backup(client):
         filename = f"lockout_backup_{date.today().strftime('%d_%m_%y')}_{int(time.time())}"
         command = f"pg_dump --dbname=postgresql://{os.environ.get('DB_USERNAME')}:{os.environ.get('DB_PASSWORD')}@127.0.0.1:5432/{os.environ.get('DB_NAME')} > {BACKUP_DIR+filename}.bak"
         os.system(command)
-        
-    except Exception as e:
+
+    except Exception:
         logger.error(f"Failed to take backup: {str(traceback.format_exc())}")
 
 
@@ -206,7 +207,7 @@ async def update_ratings(client):
             for user in data:
                 db.update_cf_rating(user['handle'], user['rating'] if 'rating' in user else 0)
 
-    except Exception as e:
+    except Exception:
         logger.error(f"Error while updating ratings: {str(traceback.format_exc())}")
 
 
@@ -233,25 +234,28 @@ async def update_problemset(client):
     try:
         for contest in contest_list:
             mapping[contest['id']] = contest['name']
-            if contest['id'] not in contest_id and contest['phase'] == "FINISHED" and not isNonStandard(contest['name']):
+            if contest['id'] not in contest_id and contest['phase'] == "FINISHED" and not isNonStandard(
+                    contest['name']):
                 con_cnt += 1
                 db.add_contest(contest['id'], contest['name'])
 
         for problem in problem_list:
-            if problem['contestId'] in mapping and not isNonStandard(mapping[problem['contestId']]) and 'rating' in problem and problem['contestId'] not in problem_id:
+            if problem['contestId'] in mapping and not isNonStandard(
+                    mapping[problem['contestId']]) and 'rating' in problem and problem['contestId'] not in problem_id:
                 prob_cnt += 1
-                db.add_problem(problem['contestId'], problem['index'], problem['name'], problem['type'], problem['rating'])
-                
-    except Exception as e:
+                db.add_problem(
+                    problem['contestId'],
+                    problem['index'],
+                    problem['name'],
+                    problem['type'],
+                    problem['rating'])
+
+    except Exception:
         logger.error(f"Error while updating problemset: {str(traceback.format_exc())}")
 
 
 async def scrape_authors(client):
     try:
         scraper.run()
-    except Exception as e:
+    except Exception:
         logger.error(f"Error while scraping {str(traceback.format_exc())}")
-
-
-
-

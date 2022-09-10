@@ -1,7 +1,7 @@
 import json
+from urllib.request import urlopen as uReq
 
 from bs4 import BeautifulSoup as soup
-from urllib.request import urlopen as uReq
 
 
 def run():
@@ -23,7 +23,7 @@ def run():
                 authors.append(x['href'].split('/')[-1])
             if 'vovuh' in authors:
                 authors.append('pikmike')
-            dict[contest_id]=authors
+            dict[contest_id] = authors
 
     with open('./data/authors.json', 'w') as json_file:
         json.dump(dict, json_file)

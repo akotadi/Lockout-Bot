@@ -1,18 +1,18 @@
 import asyncio
 import logging
-
 from math import ceil
 from random import randint
-from discord import Embed, Color
+
+from discord import Color, Embed
 
 
 class Paginator:
-    def __init__(self, data, headers, title, per_page=10, info:str=None):
+    def __init__(self, data, headers, title, per_page=10, info: str = None):
         self.data = data
         self.title = title
         self.per_page = per_page
         self.headers = headers
-        self.total_pages = ceil(len(self.data)/self.per_page)
+        self.total_pages = ceil(len(self.data) / self.per_page)
         self.current_page = 1
         self.message = None
         self.info = info
@@ -20,24 +20,24 @@ class Paginator:
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_page_elements(self, page_no):
-        return self.data[(page_no-1)*self.per_page:page_no*self.per_page]
+        return self.data[(page_no - 1) * self.per_page:page_no * self.per_page]
 
     def get_page_content(self, page_no):
         elements = self.get_page_elements(page_no)
-        val = [0]*len(self.headers)
+        val = [0] * len(self.headers)
         for i in range(len(val)):
             val[i] = max(max([len(element[i]) for element in elements]), len(self.headers[i]))
         content, dashes = "", ""
 
         for i in range(len(val)):
-            content += self.headers[i] + " "*(val[i] - len(self.headers[i])) + " "
-            dashes += "-"*val[i] + " "
+            content += self.headers[i] + " " * (val[i] - len(self.headers[i])) + " "
+            dashes += "-" * val[i] + " "
 
-        content += "\n"+dashes+"\n"
+        content += "\n" + dashes + "\n"
 
         for i in range(len(elements)):
             for j in range(len(val)):
-                content += elements[i][j] + " "*(val[j] - len(elements[i][j])) + " "
+                content += elements[i][j] + " " * (val[j] - len(elements[i][j])) + " "
             content += "\n"
         return f"```\n{content}```"
 

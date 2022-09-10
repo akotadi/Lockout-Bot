@@ -1,6 +1,6 @@
 import logging
-import discord
 
+import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
@@ -22,7 +22,6 @@ class Help(commands.Cog):
         tournament = self.client.get_command('tournament')
         footers = "\n```cpp\nReact to change pages\nPage 1: Handle related commands\nPage 2: Match related " \
                   "commands\nPage 3: Round related commands\nPage 4: Tournament related commands``` "
-
 
         content = []
         desc = f"\n\n:crossed_swords: [Handle related commands](https://github.com/pseudocoder10/Lockout-Bot/wiki/Handle-related-commands) **[use {PREFIX}handle <command>]**\n\n"
@@ -72,7 +71,7 @@ class Help(commands.Cog):
     @commands.command(name="help")
     @commands.cooldown(1, 5, BucketType.user)
     @commands.check(is_channel_allowed)
-    async def help(self, ctx, *, cmd: str=None):
+    async def help(self, ctx, *, cmd: str = None):
         """Shows help for various commands"""
         if cmd is None:
             embeds = self.make_help_embed(ctx)

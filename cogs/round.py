@@ -1,17 +1,14 @@
-import logging
-import discord
 import asyncio
-import os
+import logging
 import math
-import traceback
 
+import discord
 from discord.ext import commands
-from discord.ext.commands import cooldown, BucketType
 
+from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
 from data import dbconn
-from utils import cf_api, discord_, codeforces, updation, elo, tournament_helper, challonge_api
-from constants import AUTO_UPDATE_TIME, ADMIN_PRIVILEGE_ROLES, PREFIX
-
+from utils import (cf_api, challonge_api, codeforces, discord_,
+                   tournament_helper)
 
 MAX_ROUND_USERS = 5
 LOWER_RATING = 800
@@ -30,7 +27,8 @@ class Round(commands.Cog):
         self.api = challonge_api.ChallongeAPI(self.client)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    @commands.group(brief=f'Commands related to rounds! Type {PREFIX}round for more details', invoke_without_command=True)
+    @commands.group(brief=f'Commands related to rounds! Type {PREFIX}round for more details',
+                    invoke_without_command=True)
     @commands.check(discord_.is_channel_allowed)
     async def round(self, ctx):
         await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'round'))
@@ -54,7 +52,8 @@ class Round(commands.Cog):
                 await discord_.send_message(ctx, f"{i.mention} is already in a round!")
                 return
 
-        embed = discord.Embed(description=f"{' '.join(x.mention for x in users)} react on the message with ✅ within 30 seconds to join the round. {'Since you are the only participant, this will be a practice round and there will be no rating changes' if len(users) == 1 else ''}",
+        embed = discord.Embed(
+            description=f"{' '.join(x.mention for x in users)} react on the message with ✅ within 30 seconds to join the round. {'Since you are the only participant, this will be a practice round and there will be no rating changes' if len(users) == 1 else ''}",
             color=discord.Color.purple())
         message = await ctx.send(embed=embed)
         await message.add_reaction("✅")
@@ -125,8 +124,8 @@ class Round(commands.Cog):
         tournament = 0
         if len(users) == 2 and (await tournament_helper.is_a_match(ctx.guild.id, users[0].id, users[1].id, self.api, self.db)):
             tournament = await discord_.get_time_response(self.client, ctx,
-                                                      f"{ctx.author.mention} this round is a part of the tournament. Do you want the result of this round to be counted in the tournament. Type `1` for yes and `0` for no",
-                                                      30, ctx.author, [0, 1])
+                                                          f"{ctx.author.mention} this round is a part of the tournament. Do you want the result of this round to be counted in the tournament. Type `1` for yes and `0` for no",
+                                                          30, ctx.author, [0, 1])
             if not tournament[0]:
                 await discord_.send_message(ctx, f"{ctx.author.mention} you took too long to decide")
                 return
@@ -134,7 +133,7 @@ class Round(commands.Cog):
 
         await ctx.send(embed=discord.Embed(description="Starting the round...", color=discord.Color.green()))
 
-        problems = await codeforces.find_problems([self.db.get_handle(ctx.guild.id, x.id) for x in users]+alts, rating)
+        problems = await codeforces.find_problems([self.db.get_handle(ctx.guild.id, x.id) for x in users] + alts, rating)
         if not problems[0]:
             await discord_.send_message(ctx, problems[1])
             return
@@ -202,7 +201,7 @@ class Round(commands.Cog):
     async def _invalidate(self, ctx, member: discord.Member):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
         if not self.db.in_a_round(ctx.guild.id, member.id):
             await discord_.send_message(ctx, f"{member.mention} is not in a round")
@@ -211,7 +210,7 @@ class Round(commands.Cog):
         await discord_.send_message(ctx, f"Round deleted")
 
     @round.command(name="recent", brief="Show recent rounds")
-    async def recent(self, ctx, user: discord.Member=None):
+    async def recent(self, ctx, user: discord.Member = None):
         data = self.db.get_recent_rounds(ctx.guild.id, str(user.id) if user else None)
 
         content = discord_.recent_rounds_embed(data)
@@ -263,7 +262,7 @@ class Round(commands.Cog):
                 break
 
     @round.command(name="problems", brief="View problems of a round")
-    async def problems(self, ctx, member: discord.Member=None):
+    async def problems(self, ctx, member: discord.Member = None):
         if not member:
             member = ctx.author
         if not self.db.in_a_round(ctx.guild.id, member.id):
@@ -335,8 +334,8 @@ class Round(commands.Cog):
         duration = duration[1]
 
         problems = await discord_.get_problems_response(self.client, ctx,
-                                                 f"{ctx.author.mention} enter {problem_cnt} space seperated problem ids denoting the problems. Eg: `123/A 455/B 242/C ...`",
-                                                 60, problem_cnt, ctx.author)
+                                                        f"{ctx.author.mention} enter {problem_cnt} space seperated problem ids denoting the problems. Eg: `123/A 455/B 242/C ...`",
+                                                        60, problem_cnt, ctx.author)
         if not problems[0]:
             await discord_.send_message(ctx, f"{ctx.author.mention} you took too long to decide")
             return

@@ -1,17 +1,17 @@
 import asyncio
 import logging
-import discord
 import random
 import string
-
-from discord import Embed, Color
-from discord.ext import commands
 from operator import itemgetter
-from discord.ext.commands import cooldown, BucketType, CommandOnCooldown
 
-from data import dbconn
-from utils import cf_api, paginator, discord_
+import discord
+from discord import Color, Embed
+from discord.ext import commands
+from discord.ext.commands import BucketType, CommandOnCooldown, cooldown
+
 from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
+from data import dbconn
+from utils import cf_api, discord_, paginator
 
 HANDLE_IDENTIFY_WAIT_TIME = 60
 HANDLES_PER_PAGE = 15
@@ -38,7 +38,8 @@ class Handle(commands.Cog):
         self.cf = cf_api.CodeforcesAPI()
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    @commands.group(brief=f'Commands related to handle! Type {PREFIX}handle for more details', invoke_without_command=True)
+    @commands.group(
+        brief=f'Commands related to handle! Type {PREFIX}handle for more details', invoke_without_command=True)
     @commands.check(discord_.is_channel_allowed)
     async def handle(self, ctx):
         await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'handle'))
@@ -47,7 +48,7 @@ class Handle(commands.Cog):
     async def set(self, ctx, member: discord.Member, handle: str):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
 
         data = await self.cf.check_handle(handle)
@@ -60,9 +61,10 @@ class Handle(commands.Cog):
             await discord_.send_message(ctx, f"Handle for user {member.mention} already set to {self.db.get_handle(ctx.guild.id, member.id)}")
             return
         # 2 discord users setting same handle
-        handles = list(filter(lambda x: x[2] == handle, self.db.get_all_handles(ctx.guild.id)))
+        handles = list(
+            filter(lambda x: x[2] == handle, self.db.get_all_handles(ctx.guild.id)))
         if len(handles):
-            handle_user = await discord_.fetch_member(ctx.guild,handles[0][1])
+            handle_user = await discord_.fetch_member(ctx.guild, handles[0][1])
             await discord_.send_message(ctx, f"{member.mention} Handle {handle} is already in use by {handle_user.mention}")
             return
 
@@ -88,7 +90,7 @@ class Handle(commands.Cog):
     async def remove(self, ctx, member: discord.Member):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
         if not self.db.get_handle(ctx.guild.id, member.id):
             await discord_.send_message(ctx, f"Handle for {member.mention} not set")
@@ -106,7 +108,7 @@ class Handle(commands.Cog):
     async def identify(self, ctx, handle: str):
         if self.db.get_handle(ctx.guild.id, ctx.author.id):
             await discord_.send_message(ctx, f"Your handle is already set to {self.db.get_handle(ctx.guild.id, ctx.author.id)}, "
-                                    f"ask an admin or mod to remove it first and try again.")
+                                        f"ask an admin or mod to remove it first and try again.")
             ctx.command.reset_cooldown(ctx)
             return
 
@@ -115,21 +117,23 @@ class Handle(commands.Cog):
             await discord_.send_message(ctx, data[1])
             ctx.command.reset_cooldown(ctx)
             return
-        
+
         data = data[1]
         handle = data['handle']
-        
+
         # 2 discord users setting same handle
-        handles = list(filter(lambda x: x[2] == handle, self.db.get_all_handles(ctx.guild.id)))
+        handles = list(
+            filter(lambda x: x[2] == handle, self.db.get_all_handles(ctx.guild.id)))
         if len(handles):
-            handle_user = await discord_.fetch_member(ctx.guild,handles[0][1])
+            handle_user = await discord_.fetch_member(ctx.guild, handles[0][1])
             await discord_.send_message(ctx, f"{ctx.author.mention} Handle {handle} is already in use by {handle_user.mention}")
             return
-        
-        res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=15))
+
+        res = ''.join(random.choices(
+            string.ascii_uppercase + string.digits, k=15))
         await discord_.send_message(ctx,
-                           f"Please change your first name on this [link](https://codeforces.com/settings/social) to "
-                           f"`{res}` within {HANDLE_IDENTIFY_WAIT_TIME} seconds {ctx.author.mention}")
+                                    f"Please change your first name on this [link](https://codeforces.com/settings/social) to "
+                                    f"`{res}` within {HANDLE_IDENTIFY_WAIT_TIME} seconds {ctx.author.mention}")
         await asyncio.sleep(HANDLE_IDENTIFY_WAIT_TIME)
 
         if res != await self.cf.get_first_name(handle):
@@ -199,7 +203,7 @@ class Handle(commands.Cog):
             try:
                 data1.append([(await discord_.fetch_member(ctx.guild, int(x[1]))).name, x[2], x[3]])
             except Exception as e:
-                pass
+                self.logger.error(f"Handle list error: {e}")
         data = data1
         data = sorted(data, key=itemgetter(2), reverse=True)
         data = [[x[0], x[1], str(x[2])] for x in data]

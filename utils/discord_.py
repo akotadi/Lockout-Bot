@@ -1,17 +1,16 @@
+import asyncio
 import functools
 import logging
-import discord
-import time
-import asyncio
 import math
+import time
 
+import discord
 from humanfriendly import format_timespan as timeez
 
 from constants import ADMIN_PRIVILEGE_ROLES, ALLOWED_CHANNEL, PREFIX
-from utils.updation import match_score, round_score
-from utils import updation, cf_api
 from data import dbconn
-
+from utils import cf_api, updation
+from utils.updation import match_score, round_score
 
 logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
@@ -187,8 +186,9 @@ def ongoing_matches_embed(data):
             handle1, handle2 = db.get_handle(match.guild, match.p1_id), db.get_handle(match.guild, match.p2_id)
             a, b = updation.match_score(match.status)
             profile_url = "https://codeforces.com/profile/"
-            content.append(f"{len(content)+1}. [{handle1}]({profile_url+handle1})(**{a}** points) vs (**{b}** points) [{handle2}]"
-                           f"({profile_url+handle2}) | {match.rating} rated | Time left: {timeez(match.time+60*match.duration-int(time.time()))}")
+            content.append(
+                f"{len(content)+1}. [{handle1}]({profile_url+handle1})(**{a}** points) vs (**{b}** points) [{handle2}]"
+                f"({profile_url+handle2}) | {match.rating} rated | Time left: {timeez(match.time+60*match.duration-int(time.time()))}")
         except Exception:
             pass
     return content
@@ -201,15 +201,17 @@ def recent_matches_embed(data):
             handle1, handle2 = db.get_handle(match.guild, match.p1_id), db.get_handle(match.guild, match.p2_id)
             a, b = updation.match_score(match.status)
             profile_url = "https://codeforces.com/profile/"
-            content.append(f"{len(content)+1}. [{handle1}]({profile_url+handle1})(**{a}** points) vs (**{b}** points) [{handle2}]"
-                           f"({profile_url+handle2}) {f'was won by **{handle1 if a>b else handle2}**' if a!=b else 'ended in a **draw**!'} | {match.rating} rated | {timeez(int(time.time())-match.time)} ago")
+            content.append(
+                f"{len(content)+1}. [{handle1}]({profile_url+handle1})(**{a}** points) vs (**{b}** points) [{handle2}]"
+                f"({profile_url+handle2}) {f'was won by **{handle1 if a>b else handle2}**' if a!=b else 'ended in a **draw**!'} | {match.rating} rated | {timeez(int(time.time())-match.time)} ago")
         except Exception:
             pass
     return content
 
 
 def round_problems_embed(round_info):
-    ranklist = round_score(list(map(int, round_info.users.split())), list(map(int, round_info.status.split())), list(map(int, round_info.times.split())))
+    ranklist = round_score(list(map(int, round_info.users.split())), list(
+        map(int, round_info.status.split())), list(map(int, round_info.times.split())))
 
     problems = round_info.problems.split()
     names = [f"[{db.get_problems(problems[i])[0].name}](https://codeforces.com/contest/{problems[i].split('/')[0]}"
@@ -271,7 +273,7 @@ def ongoing_rounds_embed(data):
     return content
 
 
-async def content_pagination(content, client, PER_PAGE, heading, ctx, color, extra_text: str=""):
+async def content_pagination(content, client, PER_PAGE, heading, ctx, color, extra_text: str = ""):
     currPage = 0
     totPage = math.ceil(len(content) / PER_PAGE)
     text = '\n'.join(content[currPage * PER_PAGE: min(len(content), (currPage + 1) * PER_PAGE)])
@@ -339,6 +341,7 @@ def once(func):
             await func(*args, **kwargs)
 
     return wrapper
+
 
 async def is_channel_allowed(ctx):
     return not ALLOWED_CHANNEL or ctx.channel.id in ALLOWED_CHANNEL

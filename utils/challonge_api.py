@@ -1,7 +1,8 @@
 import logging
-import aiohttp
 import os
 import traceback
+
+import aiohttp
 
 BASE_URL = "https://api.challonge.com/v1/"
 
@@ -19,7 +20,7 @@ class ChallongeAPI:
                 async with session.request(method, url, json=params, headers=headers) as resp:
                     response = await resp.json()
                     return response
-        except Exception as e:
+        except Exception:
             self.logger.error(f"Error while updating matches: {str(traceback.format_exc())}")
             return None
 
@@ -101,6 +102,3 @@ class ChallongeAPI:
         }
 
         return await self.api_response("POST", url, params)
-
-
-

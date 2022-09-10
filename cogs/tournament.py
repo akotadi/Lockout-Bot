@@ -1,16 +1,15 @@
 import asyncio
-import discord
-import os
-import time
 import logging
+import time
 
+import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
 from humanfriendly import format_timespan as timeez
 
+from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
 from data import dbconn
-from utils import challonge_api, paginator, discord_, tournament_helper
-from constants import PREFIX, ADMIN_PRIVILEGE_ROLES
+from utils import challonge_api, discord_, paginator, tournament_helper
 
 MAX_REGISTRANTS = 256
 
@@ -22,7 +21,8 @@ class Tournament(commands.Cog):
         self.api = challonge_api.ChallongeAPI(self.client)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    @commands.group(brief=f'Commands related to tournaments! Type {PREFIX}tournament for more details', invoke_without_command=True, aliases=['tourney'])
+    @commands.group(brief=f'Commands related to tournaments! Type {PREFIX}tournament for more details',
+                    invoke_without_command=True, aliases=['tourney'])
     @commands.check(discord_.is_channel_allowed)
     async def tournament(self, ctx):
         await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'tournament'))
@@ -46,7 +46,8 @@ class Tournament(commands.Cog):
                 ["What if the bot accidentally gives victory to the wrong user?",
                  f"You can ask an admin to invalidate the match results by typing `{PREFIX}tournament match_invalidate x` where x is match number (can be accessed from challonge page of the tournament). This will also reset the subsequent matches whose result depends on this match"]]
 
-        embed = discord.Embed(description='\n\n'.join([f':small_red_triangle_down: **{x[0]}**\n:white_small_square: {x[1]}' for x in data]), color=discord.Color.dark_green())
+        embed = discord.Embed(description='\n\n'.join(
+            [f':small_red_triangle_down: **{x[0]}**\n:white_small_square: {x[1]}' for x in data]), color=discord.Color.dark_green())
         embed.set_author(name="Frequently Asked Questions about tournaments")
         await ctx.send(embed=embed)
 
@@ -58,7 +59,7 @@ class Tournament(commands.Cog):
         """
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
         if len(tournament_name) not in range(1, 51):
             await discord_.send_message(ctx, "The tournament name should be 50 character max")
@@ -73,14 +74,15 @@ class Tournament(commands.Cog):
             await discord_.send_message(ctx, "A tournament is already in progress in this server!")
             return
 
-        self.db.add_tournament(ctx.guild.id, tournament_name, tournament_type, 0, "-", 0)
+        self.db.add_tournament(
+            ctx.guild.id, tournament_name, tournament_type, 0, "-", 0)
         types = ["Single Elimination", "Double Elimination", "Swiss"]
 
         desc = f"""
-               Initialised a {types[tournament_type]} tournament. 
+               Initialised a {types[tournament_type]} tournament.
                To register, type `{PREFIX}tournament register` (Max registrations: **{MAX_REGISTRANTS}**)
                To unregister, type `{PREFIX}tournament unregister`
-               To start the tournament, type `{PREFIX}tournament begin` 
+               To start the tournament, type `{PREFIX}tournament begin`
                """
         embed = discord.Embed(description=desc, color=discord.Color.green())
         embed.set_author(name=tournament_name)
@@ -110,7 +112,8 @@ class Tournament(commands.Cog):
             await discord_.send_message(ctx, "The tournament has already reached its max registrants limit!")
             return
 
-        self.db.add_registrant(ctx.guild.id, ctx.author.id, handle_info[2], handle_info[3], 0)
+        self.db.add_registrant(ctx.guild.id, ctx.author.id,
+                               handle_info[2], handle_info[3], 0)
 
         await ctx.send(embed=discord.Embed(description=f"Successfully registered for the tournament. `{MAX_REGISTRANTS-len(registrants)-1}` slots left.",
                                            color=discord.Color.green()))
@@ -138,7 +141,7 @@ class Tournament(commands.Cog):
     async def _unregister(self, ctx, *, handle: str):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
         tournament_info = self.db.get_tournament_info(ctx.guild.id)
         if not tournament_info:
@@ -164,7 +167,7 @@ class Tournament(commands.Cog):
             await discord_.send_message(ctx, "No registrations yet")
             return
 
-        await paginator.Paginator([[str(i+1), registrants[i].handle, str(registrants[i].rating)] for i in range(len(registrants))], ["S No.", "Handle", "Rating"], "Registrants for the Lockout tournament", 15).paginate(ctx, self.client)
+        await paginator.Paginator([[str(i + 1), registrants[i].handle, str(registrants[i].rating)] for i in range(len(registrants))], ["S No.", "Handle", "Rating"], "Registrants for the Lockout tournament", 15).paginate(ctx, self.client)
 
     @tournament.command(name="info", brief="Get basic information about the tournament")
     async def info(self, ctx):
@@ -179,7 +182,8 @@ class Tournament(commands.Cog):
         desc += f"**Registrations**: {len(self.db.get_registrants(ctx.guild.id))}\n"
         desc += f"**Challonge link**: {'Tournament not started yet' if tournament_info.status == 0 else f'[link](https://challonge.com/{tournament_info.url})'}"
 
-        embed = discord.Embed(description=desc, color=discord.Color.dark_orange())
+        embed = discord.Embed(
+            description=desc, color=discord.Color.dark_orange())
         embed.set_author(name="Lockout tournament details")
         await ctx.send(embed=embed)
 
@@ -188,7 +192,7 @@ class Tournament(commands.Cog):
     async def begin(self, ctx):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
         tournament_info = self.db.get_tournament_info(ctx.guild.id)
         if not tournament_info:
@@ -215,19 +219,21 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if tournament_resp and 'errors' in tournament_resp:
-                    self.logger.error(f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
+                    self.logger.error(
+                        f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
                 return
 
             # api takes some time to register tournament id
             await asyncio.sleep(5)
             await ctx.send(f"Adding participants...")
-            participants_resp = await self.api.bulk_add_participants(tournament_resp['tournament']['id'], [{"name": f"{registrants[i].handle} ({registrants[i].rating})", "seed": i+1} for i in range(len(registrants))])
+            participants_resp = await self.api.bulk_add_participants(tournament_resp['tournament']['id'], [{"name": f"{registrants[i].handle} ({registrants[i].rating})", "seed": i + 1} for i in range(len(registrants))])
 
             if not participants_resp or 'errors' in participants_resp:
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if participants_resp and 'errors' in participants_resp:
-                    self.logger.error(f"Error in bulk adding participants: {ctx.guild.id} {participants_resp['errors']}")
+                    self.logger.error(
+                        f"Error in bulk adding participants: {ctx.guild.id} {participants_resp['errors']}")
                 await self.api.delete_tournament(tournament_resp['tournament']['id'])
                 return
 
@@ -239,13 +245,21 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if predictions_resp and 'errors' in predictions_resp:
-                    self.logger.error(f"Error in enabling predictions: {ctx.guild.id} {predictions_resp['errors']}")
+                    self.logger.error(
+                        f"Error in enabling predictions: {ctx.guild.id} {predictions_resp['errors']}")
                 await self.api.delete_tournament(tournament_resp['tournament']['id'])
                 return
 
-            self.db.update_tournament_params(tournament_resp['tournament']['id'], tournament_resp['tournament']['url'], 1, ctx.guild.id)
+            self.db.update_tournament_params(
+                tournament_resp['tournament']['id'],
+                tournament_resp['tournament']['url'],
+                1,
+                ctx.guild.id)
             for data in participants_resp:
-                self.db.map_user_to_challongeid(ctx.guild.id, registrants[data['participant']['seed']-1].discord_id, data['participant']['id'])
+                self.db.map_user_to_challongeid(ctx.guild.id,
+                                                registrants[data['participant']
+                                                            ['seed'] - 1].discord_id,
+                                                data['participant']['id'])
 
             desc = ""
             desc += f"The tournament has been setup. You can find the brackets [here](https://challonge.com/{tournament_resp['tournament']['url']})\n"
@@ -255,7 +269,8 @@ class Tournament(commands.Cog):
             desc += f"**Tournament type**: {['Single Elimination', 'Double Elimination', 'Swiss'][tournament_info.type]}\n"
             desc += f"**Number of registrations**: {len(registrants)}"
 
-            embed = discord.Embed(description=desc, color=discord.Color.green())
+            embed = discord.Embed(
+                description=desc, color=discord.Color.green())
             embed.set_author(name=tournament_info.name)
             await ctx.send(embed=embed)
             ctx.command.reset_cooldown(ctx)
@@ -266,22 +281,25 @@ class Tournament(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 await discord_.send_message(ctx, "Some error occurred, try again later")
                 if tournament_resp and 'errors' in tournament_resp:
-                    self.logger.error(f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
+                    self.logger.error(
+                        f"Error in tournament setup: {ctx.guild.id} {tournament_resp['errors']}")
                 return
 
-            self.db.update_tournament_params(tournament_info.id, tournament_info.url, 2, ctx.guild.id)
+            self.db.update_tournament_params(
+                tournament_info.id, tournament_info.url, 2, ctx.guild.id)
 
             desc = f"The tournament has officially begun! View brackets on this [link](https://challonge.com/{tournament_info.url})\n\n"
             desc += f"To play tournament matches just use the `{PREFIX}round` command of the bot and challenge someone to a round. \n" \
-                   f"If the round is part of the tournament, then the bot will ask whether you want the result of the round " \
-                   f"to be counted in the tournament. \nIn case of a draw, you will have to play the round again. GLHF!\n\n"
+                f"If the round is part of the tournament, then the bot will ask whether you want the result of the round " \
+                f"to be counted in the tournament. \nIn case of a draw, you will have to play the round again. GLHF!\n\n"
             desc += f"**Some useful commands**:\n\n"
             desc += f"`{PREFIX}tournament matches`: View a list of future matches of the tournament\n"
             desc += f"`{PREFIX}tournament info`: View general info about the tournament\n"
             desc += f"`{PREFIX}tournament forcewin <handle>`: Grant victory to a user without conducting the match\n"
             desc += f"`{PREFIX}tournament invalidate`: Invalidate the tournament\n"
 
-            embed = discord.Embed(description=desc, color=discord.Color.green())
+            embed = discord.Embed(
+                description=desc, color=discord.Color.green())
             embed.set_author(name=tournament_info.name)
             await ctx.send(embed=embed)
 
@@ -330,8 +348,10 @@ class Tournament(commands.Cog):
             data = match['match']
             if data['state'] == 'open':
                 desc = f"**Round {abs(data['round'])}** {'(Losers bracket)' if data['round'] < 0 else ''}\n"
-                user1 = self.db.get_registrant_info(ctx.guild.id, data['player1_id'])
-                user2 = self.db.get_registrant_info(ctx.guild.id, data['player2_id'])
+                user1 = self.db.get_registrant_info(
+                    ctx.guild.id, data['player1_id'])
+                user2 = self.db.get_registrant_info(
+                    ctx.guild.id, data['player2_id'])
                 desc += f"{user1.handle} ({user1.rating}) vs ({user2.rating}) {user2.handle}\n"
                 content.append(desc)
 
@@ -343,7 +363,7 @@ class Tournament(commands.Cog):
     async def forcewin(self, ctx, *, handle: str):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
 
         tournament_info = self.db.get_tournament_info(ctx.guild.id)
@@ -410,7 +430,8 @@ class Tournament(commands.Cog):
                 winner_handle = await tournament_helper.get_winner(tournament_info.id, self.api)
                 await ctx.send(embed=tournament_helper.tournament_over_embed(tournament_info.guild, winner_handle, self.db))
                 self.db.delete_tournament(tournament_info.guild)
-                self.db.add_to_finished_tournaments(tournament_info, winner_handle)
+                self.db.add_to_finished_tournaments(
+                    tournament_info, winner_handle)
 
     @tournament.command(name="forcedraw", brief="Force draw a match (Swiss only)")
     @commands.cooldown(1, 10, BucketType.user)
@@ -492,9 +513,11 @@ class Tournament(commands.Cog):
                 await ctx.send(
                     embed=tournament_helper.tournament_over_embed(tournament_info.guild, winner_handle, self.db))
                 self.db.delete_tournament(tournament_info.guild)
-                self.db.add_to_finished_tournaments(tournament_info, winner_handle)
+                self.db.add_to_finished_tournaments(
+                    tournament_info, winner_handle)
 
-    @tournament.command(name="match_invalidate", brief="Invalidate the results of a match", aliases=['invalidate_match'])
+    @tournament.command(name="match_invalidate", brief="Invalidate the results of a match",
+                        aliases=['invalidate_match'])
     @commands.cooldown(1, 10, BucketType.user)
     async def match_invalidate(self, ctx, idx: int):
         if not discord_.has_admin_privilege(ctx):
@@ -544,8 +567,11 @@ class Tournament(commands.Cog):
 
         content = []
         for i in range(len(data)):
-            content.append(f"`{len(data)-i}.` [{data[i].name}](https://challonge.com/{data[i].url}) was won by [{data[i].winner}](https://codeforces.com/profile/{data[i].winner}) "
-                           f"| {['Single Elimination', 'Double Elimination', 'Swiss'][data[i].type]} | {timeez(int(time.time()) - data[i].time)}")
+            content.append(
+                f"`{len(data)-i}.` [{data[i].name}](https://challonge.com/{data[i].url}) "
+                f"was won by [{data[i].winner}](https://codeforces.com/profile/{data[i].winner}) "
+                f"| {['Single Elimination', 'Double Elimination', 'Swiss'][data[i].type]} "
+                f"| {timeez(int(time.time()) - data[i].time)}")
 
         await discord_.content_pagination(content, self.client, 10, "Recent tournaments", ctx, discord.Color.dark_purple())
 

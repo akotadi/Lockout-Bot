@@ -1,10 +1,10 @@
 import json
 import logging
-import random
 import math
+import random
 
-from utils import cf_api
 from data import dbconn
+from utils import cf_api
 
 logger = logging.getLogger(__name__)
 db = dbconn.DbConn()
@@ -38,8 +38,7 @@ def filter_problems(all_problems, user_problems, handles):
         global authors
         authors = json.load(f)
     unsolved = []
-    names = [x.name for x in user_problems]
-    names.sort()
+    names = sorted([x.name for x in user_problems])
 
     for problem in all_problems:
         if isNonStandard(problem.id) or isAuthor(handles, problem):
@@ -48,7 +47,7 @@ def filter_problems(all_problems, user_problems, handles):
         found = False
         l, r = 0, len(names) - 1
         while l <= r:
-            mid = int((l+r)/2)
+            mid = int((l + r) / 2)
             if names[mid] > problem.name:
                 r = mid - 1
             elif names[mid] < problem.name:

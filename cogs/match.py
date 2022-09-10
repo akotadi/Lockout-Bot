@@ -1,21 +1,19 @@
 import asyncio
 import logging
-import matplotlib.pyplot as plt
-import os
 import math
-import discord
+import os
 import time
-import traceback
-
-from discord import Embed, Color, File
-from discord.ext import commands
-from discord.ext.commands import cooldown, BucketType
-from operator import itemgetter
 from io import BytesIO
+from operator import itemgetter
 
+import discord
+import matplotlib.pyplot as plt
+from discord import Color, Embed, File
+from discord.ext import commands
+
+from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
 from data import dbconn
-from utils import cf_api, paginator, discord_, codeforces, updation, elo
-from constants import PREFIX, ADMIN_PRIVILEGE_ROLES
+from utils import cf_api, codeforces, discord_, elo, paginator, updation
 
 LOWER_RATING = 800
 UPPER_RATING = 3600
@@ -28,7 +26,7 @@ RECENT_PER_PAGE = 5
 async def plot_graph(ctx, data, handle):
     x_axis, y_axis = [], []
     for i in range(0, len(data)):
-        x_axis.append(i+1)
+        x_axis.append(i + 1)
         y_axis.append(data[i])
     ends = [-100000, 1300, 1400, 1500, 1600, 1700, 1750, 1800, 1850, 1900, 100000]
     colors = ['#CCCCCC', '#77FF77', '#77DDBB', '#AAAAFF', '#FF88FF', '#FFCC88', '#FFBB55', '#FF7777', '#FF3333',
@@ -41,7 +39,7 @@ async def plot_graph(ctx, data, handle):
     locs, labels = plt.xticks()
     for loc in locs:
         plt.axvline(loc, color=bgcolor, linewidth=0.5)
-    plt.ylim(min(1250, ymin-100), max(ymax + 100, 1650))
+    plt.ylim(min(1250, ymin - 100), max(ymax + 100, 1650))
     plt.legend(["%s (%d)" % (handle, y_axis[-1])], loc='upper left')
 
     filename = "%s.png" % str(ctx.message.id)
@@ -81,13 +79,14 @@ class Match(commands.Cog):
         self.cf = cf_api.CodeforcesAPI()
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    @commands.group(brief=f'Commands related to matches. Type {PREFIX}match for more details', invoke_without_command=True)
+    @commands.group(
+        brief=f'Commands related to matches. Type {PREFIX}match for more details', invoke_without_command=True)
     @commands.check(discord_.is_channel_allowed)
     async def match(self, ctx):
         await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'match'))
 
     @match.command(brief="Challenge someone to a match")
-    async def challenge(self, ctx, member:discord.Member, rating: int):
+    async def challenge(self, ctx, member: discord.Member, rating: int):
         if member.id == ctx.author.id:
             await discord_.send_message(ctx, "You cannot challenge yourself!!")
             return
@@ -97,10 +96,12 @@ class Match(commands.Cog):
         if not self.db.get_handle(ctx.guild.id, member.id):
             await discord_.send_message(ctx, f"Handle for your opponent {member.mention} not set")
             return
-        if self.db.is_challenging(ctx.guild.id, ctx.author.id) or self.db.is_challenged(ctx.guild.id, ctx.author.id) or self.db.in_a_match(ctx.guild.id, ctx.author.id):
+        if self.db.is_challenging(ctx.guild.id, ctx.author.id) or self.db.is_challenged(
+                ctx.guild.id, ctx.author.id) or self.db.in_a_match(ctx.guild.id, ctx.author.id):
             await discord_.send_message(ctx, "You are already challenging someone/being challenged/in a match. Pls try again later")
             return
-        if self.db.is_challenging(ctx.guild.id, member.id) or self.db.is_challenged(ctx.guild.id, member.id) or self.db.in_a_match(ctx.guild.id, member.id):
+        if self.db.is_challenging(ctx.guild.id, member.id) or self.db.is_challenged(
+                ctx.guild.id, member.id) or self.db.in_a_match(ctx.guild.id, member.id):
             await discord_.send_message(ctx, "Your opponent is already challenging someone/being challenged/in a match. Pls try again later")
             return
         if rating not in range(LOWER_RATING, UPPER_RATING - 400 + 1):
@@ -155,7 +156,7 @@ class Match(commands.Cog):
         self.db.remove_challenge(ctx.guild.id, ctx.author.id)
 
         handle1, handle2 = self.db.get_handle(ctx.guild.id, data.p1_id), self.db.get_handle(ctx.guild.id, data.p2_id)
-        problems = await codeforces.find_problems([handle1, handle2], [data.rating + i*100 for i in range(0, 5)])
+        problems = await codeforces.find_problems([handle1, handle2], [data.rating + i * 100 for i in range(0, 5)])
 
         if not problems[0]:
             await discord_.send_message(ctx, problems[1])
@@ -166,12 +167,12 @@ class Match(commands.Cog):
 
         match_info = self.db.get_match_info(ctx.guild.id, ctx.author.id)
         await ctx.send(embed=discord_.match_problems_embed(match_info))
-    
+
     @match.command(brief="Invalidate a match (Admin/Mod/Lockout Manager only)")
     async def _invalidate(self, ctx, member: discord.Member):
         if not discord_.has_admin_privilege(ctx):
             await discord_.send_message(ctx, f"{ctx.author.mention} you require 'manage server' permission or one of the "
-                                    f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
+                                        f"following roles: {', '.join(ADMIN_PRIVILEGE_ROLES)} to use this command")
             return
         if not self.db.in_a_match(ctx.guild.id, member.id):
             await discord_.send_message(ctx, f"User {member.mention} is not in a match.")
@@ -208,15 +209,15 @@ class Match(commands.Cog):
 
         try:
             message = await self.client.wait_for('message', timeout=30, check=lambda
-                message: message.author == opponent and message.content.lower() == 'yes' and message.channel.id == ctx.channel.id)
+                                                 message: message.author == opponent and message.content.lower() == 'yes' and message.channel.id == ctx.channel.id)
             channel = self.client.get_channel(match.channel)
             a, b = updation.match_score("00000")
             p1_rank, p2_rank = 1 if a >= b else 2, 1 if b >= a else 2
             ranklist = []
             ranklist.append([await discord_.fetch_member(ctx.guild, match.p1_id), p1_rank,
-                                 self.db.get_match_rating(ctx.guild.id, match.p1_id)[-1]])
+                             self.db.get_match_rating(ctx.guild.id, match.p1_id)[-1]])
             ranklist.append([await discord_.fetch_member(ctx.guild, match.p2_id), p2_rank,
-                                 self.db.get_match_rating(ctx.guild.id, match.p2_id)[-1]])
+                             self.db.get_match_rating(ctx.guild.id, match.p2_id)[-1]])
             ranklist = sorted(ranklist, key=itemgetter(1))
             res = elo.calculateChanges(ranklist)
 
@@ -249,7 +250,7 @@ class Match(commands.Cog):
 
         currPage = 0
         totPage = math.ceil(len(content) / ONGOING_PER_PAGE)
-        text = '\n'.join(content[currPage * ONGOING_PER_PAGE: min(len(content), (currPage+1)*ONGOING_PER_PAGE)])
+        text = '\n'.join(content[currPage * ONGOING_PER_PAGE: min(len(content), (currPage + 1) * ONGOING_PER_PAGE)])
         embed = discord.Embed(description=text, color=discord.Color.gold())
         embed.set_author(name="Ongoing matches")
         embed.set_footer(text=f"Page {currPage+1} of {totPage}")
@@ -261,7 +262,8 @@ class Match(commands.Cog):
         await message.add_reaction("⏭")
 
         def check(reaction, user):
-            return reaction.message.id == message.id and reaction.emoji in ["⏮", "◀", "▶", "⏭"] and user != self.client.user
+            return reaction.message.id == message.id and reaction.emoji in [
+                "⏮", "◀", "▶", "⏭"] and user != self.client.user
 
         while True:
             try:
@@ -273,12 +275,13 @@ class Match(commands.Cog):
                 if reaction.emoji == "⏮":
                     currPage = 0
                 elif reaction.emoji == "◀":
-                    currPage = max(currPage-1, 0)
+                    currPage = max(currPage - 1, 0)
                 elif reaction.emoji == "▶":
-                    currPage = min(currPage+1, totPage-1)
+                    currPage = min(currPage + 1, totPage - 1)
                 else:
-                    currPage = totPage-1
-                text = '\n'.join(content[currPage * ONGOING_PER_PAGE: min(len(content), (currPage + 1) * ONGOING_PER_PAGE)])
+                    currPage = totPage - 1
+                text = '\n'.join(
+                    content[currPage * ONGOING_PER_PAGE: min(len(content), (currPage + 1) * ONGOING_PER_PAGE)])
                 embed = discord.Embed(description=text, color=discord.Color.gold())
                 embed.set_author(name="Ongoing matches")
                 embed.set_footer(text=f"Page {currPage + 1} of {totPage}")
@@ -288,7 +291,7 @@ class Match(commands.Cog):
                 break
 
     @match.command(brief="Show recent matches")
-    async def recent(self, ctx, member: discord.Member=None):
+    async def recent(self, ctx, member: discord.Member = None):
         data = self.db.get_recent_matches(ctx.guild.id, member.id if member else None)
         if len(data) == 0:
             await discord_.send_message(ctx, "No recent matches")
@@ -339,7 +342,7 @@ class Match(commands.Cog):
                 break
 
     @match.command(brief="Show problems left from someone's ongoing match")
-    async def problems(self, ctx, member: discord.Member=None):
+    async def problems(self, ctx, member: discord.Member = None):
         if member is None:
             member = ctx.author
         if not self.db.in_a_match(ctx.guild.id, member.id):
@@ -348,7 +351,7 @@ class Match(commands.Cog):
         await ctx.send(embed=discord_.match_problems_embed(self.db.get_match_info(ctx.guild.id, member.id)))
 
     @match.command(brief="Plot match rating")
-    async def rating(self, ctx, member: discord.Member=None):
+    async def rating(self, ctx, member: discord.Member = None):
         if member is None:
             member = ctx.author
         data = self.db.get_match_rating(ctx.guild.id, member.id)

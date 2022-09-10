@@ -1,16 +1,20 @@
-import psycopg2
 import os
 import time
-
 from collections import namedtuple
+
+import psycopg2
 from dotenv import load_dotenv
 
 
 class DbConn:
     def __init__(self):
         load_dotenv('.env')
-        self.conn = psycopg2.connect(database=os.environ.get("DB_NAME"), user=os.environ.get("DB_USERNAME"),
-                                     password=os.environ.get("DB_PASSWORD"), host=os.environ.get("DB_HOST"), port="5432")
+        self.conn = psycopg2.connect(
+            database=os.environ.get("DB_NAME"),
+            user=os.environ.get("DB_USERNAME"),
+            password=os.environ.get("DB_PASSWORD"),
+            host=os.environ.get("DB_HOST"),
+            port="5432")
         self.make_tables()
 
     def make_tables(self):
@@ -35,7 +39,7 @@ class DbConn:
                     """)
         cmds.append("""
                         CREATE TABLE IF NOT EXISTS contests(
-                            id INT, 
+                            id INT,
                             name TEXT
                     )
                     """)
@@ -45,7 +49,7 @@ class DbConn:
                             p1_id BIGINT,
                             p2_id BIGINT,
                             rating INT,
-                            time INT, 
+                            time INT,
                             channel BIGINT,
                             duration BIGINT
                     )
@@ -71,9 +75,9 @@ class DbConn:
                         rating INT,
                         time INT,
                         status TEXT,
-                        result INT, 
+                        result INT,
                         duration BIGINT
-                    ) 
+                    )
                     """)
         cmds.append("""
                         CREATE TABLE IF NOT EXISTS rating(
@@ -261,7 +265,7 @@ class DbConn:
             query = """
                            SELECT * FROM challenge
                            WHERE
-                           guild = %s AND time = %s AND p1_id = %s 
+                           guild = %s AND time = %s AND p1_id = %s
                        """
             curr = self.conn.cursor()
             curr.execute(query, (guild, tme, id))
@@ -275,7 +279,7 @@ class DbConn:
             query = """
                            SELECT * FROM challenge
                            WHERE
-                           guild = %s AND p1_id = %s 
+                           guild = %s AND p1_id = %s
                        """
             curr = self.conn.cursor()
             curr.execute(query, (guild, id))
@@ -290,7 +294,7 @@ class DbConn:
         query = """
                        SELECT * FROM challenge
                        WHERE
-                       guild = %s AND p2_id = %s 
+                       guild = %s AND p2_id = %s
                    """
         curr = self.conn.cursor()
         curr.execute(query, (guild, id))
@@ -380,7 +384,7 @@ class DbConn:
         query = f"""
                     SELECT name FROM contests
                     WHERE
-                    id = %s 
+                    id = %s
                 """
         curr = self.conn.cursor()
         curr.execute(query, (contest_id,))
@@ -483,7 +487,7 @@ class DbConn:
             query = f"""
                         SELECT * FROM finished
                         WHERE
-                        guild = %s 
+                        guild = %s
                         ORDER BY time DESC
                     """
             curr = self.conn.cursor()
@@ -572,7 +576,8 @@ class DbConn:
         curr = self.conn.cursor()
         curr.execute(query, (ctx.guild.id, ' '.join([f"{x.id}" for x in users]), ' '.join(map(str, rating)),
                              ' '.join(map(str, points)), int(time.time()), ctx.channel.id,
-                             ' '.join([f"{x.id}/{x.index}" for x in problems]), ' '.join('0' for i in range(len(users))),
+                             ' '.join([f"{x.id}/{x.index}" for x in problems]
+                                      ), ' '.join('0' for i in range(len(users))),
                              duration, repeat, ' '.join(['0'] * len(users)), tournament))
         self.add_to_alt_table(ctx, users, alts)
         self.conn.commit()
@@ -616,8 +621,11 @@ class DbConn:
         curr.execute(query, (guild, f"%{users}%"))
         data = curr.fetchone()
         curr.close()
-        Round = namedtuple('Round', 'guild users rating points time channel problems status duration repeat times, tournament')
-        return Round(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11])
+        Round = namedtuple(
+            'Round',
+            'guild users rating points time channel problems status duration repeat times, tournament')
+        return Round(data[0], data[1], data[2], data[3], data[4], data[5],
+                     data[6], data[7], data[8], data[9], data[10], data[11])
 
     def get_all_rounds(self, guild=None):
         query = f"""
@@ -629,18 +637,21 @@ class DbConn:
         curr.execute(query)
         res = curr.fetchall()
         curr.close()
-        Round = namedtuple('Round', 'guild users rating points time channel problems status duration repeat times, tournament')
-        return [Round(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11]) for data in res]
+        Round = namedtuple(
+            'Round',
+            'guild users rating points time channel problems status duration repeat times, tournament')
+        return [Round(data[0], data[1], data[2], data[3], data[4], data[5], data[6],
+                      data[7], data[8], data[9], data[10], data[11]) for data in res]
 
     def update_round_status(self, guild, user, status, problems, timestamp):
         query = f"""
-                    UPDATE ongoing_rounds 
+                    UPDATE ongoing_rounds
                     SET
-                    status = %s, 
+                    status = %s,
                     problems = %s,
                     times = %s
                     WHERE
-                    guild = %s AND users LIKE %s 
+                    guild = %s AND users LIKE %s
                 """
         curr = self.conn.cursor()
         curr.execute(query,
@@ -675,9 +686,19 @@ class DbConn:
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
         curr = self.conn.cursor()
-        curr.execute(query, (round_info.guild, round_info.users, round_info.rating, round_info.points, round_info.time,
-                                round_info.channel, round_info.problems, round_info.status, round_info.duration, round_info.repeat,
-                                round_info.times, int(time.time())))
+        curr.execute(query,
+                     (round_info.guild,
+                      round_info.users,
+                      round_info.rating,
+                      round_info.points,
+                      round_info.time,
+                      round_info.channel,
+                      round_info.problems,
+                      round_info.status,
+                      round_info.duration,
+                      round_info.repeat,
+                      round_info.times,
+                      int(time.time())))
         self.conn.commit()
         curr.close()
 
@@ -697,7 +718,9 @@ class DbConn:
         curr.execute(query, (guild, ) if user is None else (guild, f"%{user}%"))
         res = curr.fetchall()
         curr.close()
-        Round = namedtuple('Round', 'guild users rating points time channel problems status duration repeat times end_time')
+        Round = namedtuple(
+            'Round',
+            'guild users rating points time channel problems status duration repeat times end_time')
         data = []
         for x in res:
             data.append(Round(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11]))
@@ -835,7 +858,7 @@ class DbConn:
     def update_tournament_params(self, id, url, status, guild):
         query = f"""
                     UPDATE tournament_info
-                    SET 
+                    SET
                     id = %s,
                     url = %s,
                     status = %s
@@ -874,7 +897,7 @@ class DbConn:
 
     def delete_tournament(self, guild):
         query = f"""
-                    DELETE FROM tournament_info 
+                    DELETE FROM tournament_info
                     WHERE guild = %s
                 """
         curr = self.conn.cursor()
@@ -913,5 +936,3 @@ class DbConn:
         curr.close()
         Tournament = namedtuple("Tournament", "guild name type id url winner time")
         return [Tournament(x[0], x[1], x[2], x[3], x[4], x[5], x[6]) for x in data]
-
-
