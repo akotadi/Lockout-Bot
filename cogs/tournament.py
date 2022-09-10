@@ -23,6 +23,7 @@ class Tournament(commands.Cog):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.group(brief=f'Commands related to tournaments! Type {PREFIX}tournament for more details', invoke_without_command=True, aliases=['tourney'])
+    @commands.check(discord_.is_channel_allowed)
     async def tournament(self, ctx):
         await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'tournament'))
 

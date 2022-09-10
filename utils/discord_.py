@@ -7,7 +7,7 @@ import math
 
 from humanfriendly import format_timespan as timeez
 
-from constants import ADMIN_PRIVILEGE_ROLES, PREFIX
+from constants import ADMIN_PRIVILEGE_ROLES, ALLOWED_CHANNEL, PREFIX
 from utils.updation import match_score, round_score
 from utils import updation, cf_api
 from data import dbconn
@@ -339,3 +339,6 @@ def once(func):
             await func(*args, **kwargs)
 
     return wrapper
+
+async def is_channel_allowed(ctx):
+    return not ALLOWED_CHANNEL or ctx.channel.id in ALLOWED_CHANNEL

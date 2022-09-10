@@ -39,6 +39,7 @@ class Handle(commands.Cog):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.group(brief=f'Commands related to handle! Type {PREFIX}handle for more details', invoke_without_command=True)
+    @commands.check(discord_.is_channel_allowed)
     async def handle(self, ctx):
         await ctx.send(embed=discord_.make_command_help_embed(self.client, ctx, 'handle'))
 

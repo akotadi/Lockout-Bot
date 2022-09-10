@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import BucketType
 
 from constants import PREFIX
+from utils.discord_ import is_channel_allowed
 
 
 class Help(commands.Cog):
@@ -70,6 +71,7 @@ class Help(commands.Cog):
 
     @commands.command(name="help")
     @commands.cooldown(1, 5, BucketType.user)
+    @commands.check(is_channel_allowed)
     async def help(self, ctx, *, cmd: str=None):
         """Shows help for various commands"""
         if cmd is None:

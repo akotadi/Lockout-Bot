@@ -4,6 +4,7 @@ PREFIX = "&"
 
 ADMIN_PRIVILEGE_ROLES = ['Admin', 'Moderator', 'Lockout Manager']
 OWNERS = [481270533506465803]
+ALLOWED_CHANNEL = [826648325398724619]
 
 BACKUP_DIR = "./data/backup/"
 LOG_FILE_PATH = "./logs/lockout.log"
