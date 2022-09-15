@@ -140,22 +140,25 @@ class Handle(commands.Cog):
             await discord_.send_message(ctx, f"Unable to set handle, please try again {ctx.author.mention}")
             return
 
-        member = ctx.author
-        if "rating" not in data:
-            rating = 0
-            rank = "unrated"
-        else:
-            rating = data['rating']
-            rank = data['rank']
-        self.db.add_handle(ctx.guild.id, member.id, handle, rating)
-        self.db.add_rated_user(ctx.guild.id, member.id)
-        embed = discord.Embed(
-            description=f'Handle for {member.mention} successfully set to [{handle}](https://codeforces.com/profile/{handle})',
-            color=Color(cf_colors[rank.lower()]))
-        embed.add_field(name='Rank', value=f'{rank}', inline=True)
-        embed.add_field(name='Rating', value=f'{rating}', inline=True)
-        embed.set_thumbnail(url=f"{data['titlePhoto']}")
-        await ctx.send(embed=embed)
+        try:
+            member = ctx.author
+            if "rating" not in data:
+                rating = 0
+                rank = "unrated"
+            else:
+                rating = data['rating']
+                rank = data['rank']
+            self.db.add_handle(ctx.guild.id, member.id, handle, rating)
+            self.db.add_rated_user(ctx.guild.id, member.id)
+            embed = discord.Embed(
+                description=f'Handle for {member.mention} successfully set to [{handle}](https://codeforces.com/profile/{handle})',
+                color=Color(cf_colors[rank.lower()]))
+            embed.add_field(name='Rank', value=f'{rank}', inline=True)
+            embed.add_field(name='Rating', value=f'{rating}', inline=True)
+            embed.set_thumbnail(url=f"https:{data['titlePhoto']}")
+            await ctx.send(embed=embed)
+        except Exception as err:
+            self.logger.error(f"Error while setting handle {err}")
 
     @identify.error
     async def identify_error(self, ctx, exc):
